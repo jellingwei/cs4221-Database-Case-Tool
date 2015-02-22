@@ -56,6 +56,9 @@
     <ClCompile Include="attributeset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bernstein.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="casetool.h">
@@ -76,6 +79,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="attributeset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bernstein.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

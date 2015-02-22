@@ -72,6 +72,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="attributeset.cpp" />
+    <ClCompile Include="bernstein.cpp" />
     <ClCompile Include="casetool.cpp" />
     <ClCompile Include="FunctionalDependency.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_casetool.cpp">
@@ -115,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="attributeset.h" />
+    <ClInclude Include="bernstein.h" />
     <ClInclude Include="FunctionalDependency.h" />
     <ClInclude Include="GeneratedFiles\ui_casetool.h" />
   </ItemGroup>

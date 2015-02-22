@@ -17,13 +17,7 @@ bool AttributeSet::isFdApplicable(FunctionalDependency fd) {
 		return false;
 	}
 
-	std::vector<int> intersect;
-	set_intersection(this->attributes.begin(), this->attributes.end(), 
-					 leftSide.begin(), leftSide.end(), 
-					 std::inserter(intersect, intersect.begin()));
-
-
-	return intersect.size() > 0;
+	return containsAttributes(leftSide);
 }
 
 bool AttributeSet::containsAttributes(set<int> attr) {
