@@ -6,13 +6,16 @@
 #include <QDebug> 
 
 
-
 using std::set;
 using std::min_element;
+
+class AttributeSet;
 
 class FunctionalDependency {
 public:
 	FunctionalDependency(set<int>, set<int>);
+	FunctionalDependency(AttributeSet, AttributeSet);
+
 	set<int> getLhs();
 	set<int> getRhs();
 
@@ -33,4 +36,5 @@ public:
 private:
 	set<int> lhs;
 	set<int> rhs;
+
 };

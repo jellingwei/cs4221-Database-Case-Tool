@@ -5,6 +5,8 @@
 
 using std::set;
 
+class FunctionalDependency;
+
 class AttributeSet {
 public:
 	AttributeSet(set<int>);

@@ -4,14 +4,13 @@
 #include "attributeset.h"
 #include "functionaldependency.h"
 
-
 namespace bernstein {
 	using std::unordered_map;
 	using std::set;
 
 	set<FunctionalDependency> decomposeFd(set<FunctionalDependency> );
 
-	set<FunctionalDependency> removeRedundantAttributes(set<FunctionalDependency>, AttributeSet);
+	set<FunctionalDependency> removeRedundantAttributes(set<FunctionalDependency>);
 	set<FunctionalDependency> obtainMinimalCover(set<FunctionalDependency>);
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitionFd(set<FunctionalDependency>);
