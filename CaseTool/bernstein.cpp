@@ -66,7 +66,7 @@ namespace bernstein {
 				bool isRedundant = closure.containsAttributes(attributeAsSet);
 
 				if (isRedundant) {
-					lhs = withoutAttr;
+					lhs = dropAttributeFromAttributeSet(lhs, attribute);
 				}
 			}
 
