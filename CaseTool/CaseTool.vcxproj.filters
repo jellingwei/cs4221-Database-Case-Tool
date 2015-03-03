@@ -59,6 +59,9 @@
     <ClCompile Include="bernstein.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ltk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="casetool.h">
@@ -82,6 +85,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bernstein.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ltk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
