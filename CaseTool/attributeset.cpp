@@ -69,6 +69,29 @@ AttributeSet AttributeSet::addAttributesToSet(AttributeSet attributesToAdd) {
 	return AttributeSet(attributes);
 }
 
+set<AttributeSet> AttributeSet::constructRelations(set<FunctionalDependency> fdSet) {
+	set<AttributeSet> constructedRelations;
+
+	for (auto fdSetItr = fdSet.begin(); fdSetItr != fdSet.end(); ++fdSetItr) {
+		set<int> relationAttributes;
+		FunctionalDependency fd = *fdSetItr;
+
+		set<int> fdLhs = fd.getLhs();
+		for (auto fdItr = fdLhs.begin(); fdItr != fdLhs.end(); ++fdItr) {
+			relationAttributes.insert(*fdItr);
+		}
+
+		set<int> fdRhs = fd.getRhs();
+		for (auto fdItr = fdRhs.begin(); fdItr != fdRhs.end(); ++fdItr) {
+			relationAttributes.insert(*fdItr);
+		}
+
+		AttributeSet newRelation(relationAttributes);
+		constructedRelations.insert(newRelation);
+	}
+	return constructedRelations;
+}
+
 set<int> AttributeSet::getAttributes() {
 	return attributes;
 }

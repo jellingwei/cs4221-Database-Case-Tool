@@ -18,6 +18,18 @@ public:
 	set<int> getAttributes();
 	int size();
 
+	static set<AttributeSet> constructRelations(set<FunctionalDependency>);
+
+	bool operator<( const AttributeSet& attributeSet2 ) const
+	{
+
+		if (attributes < attributeSet2.attributes) {
+			return true;
+		}
+
+		return false;
+	}
+
 private:
 	set<int> attributes;
 
