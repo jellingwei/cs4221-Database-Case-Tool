@@ -13,13 +13,17 @@ namespace ltk {
 		throw exception();
 	}
 
-	set<AttributeSet> constructPrepatorySchema(AttributeSet startAttributes, set<FunctionalDependency> startFDs) {
+	set<AttributeSet> constructPreparatorySchema(AttributeSet startAttributes, set<FunctionalDependency> startFDs) {
 		set<FunctionalDependency> singletonFDs = bernstein::decomposeFd(startFDs);
 		set<FunctionalDependency> nonRedundantAttributesFDs = bernstein::removeRedundantAttributes(singletonFDs);
 		//set<FunctinonalDependency> minimalFDs = removeRedundantFDs(nonRedundantAttributesFDs);
 		//unordered_map<AttributeSet, set<FunctionalDependency>> partitionedFDs = bernstein::partitionFd(minimalFDs);
 		//Construct relations
+		//Augment preparatory schema(constructed relations, minimalFDs);
+		throw exception();
+	}
 
+	set<AttributeSet> augmentPreparatorySchema(set<AttributeSet> constructedRelations, set<FunctionalDependency> minimalFDs) {
 		throw exception();
 	}
 
