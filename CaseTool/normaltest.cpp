@@ -52,23 +52,23 @@ namespace normalTest {
 			testSet.erase(dummyIter);
 			//split into smaller subsets
 			if(testSet.size() < attrSize){
-				int loopIterator = testSet.size();
-				while(loopIterator>0){
+				int loopIterator = 0;
+				while(loopIterator<testSet.size()){
 					set<int> temp = testSet;
 					auto iter = temp.begin();
 
 					int k = loopIterator;
 					//iterate to the correct element
 					while(1){
-						if(k==3)
+						if(k==0)
 							break;
 						++iter;
-						k++;
+						k--;
 					}
 
 					temp.erase(iter);
 					powerSet.insert(temp);
-					loopIterator--;
+					loopIterator++;
 				}
 			}
 			attrSize--;
