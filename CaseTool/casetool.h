@@ -12,6 +12,12 @@ public:
 	CaseTool(QWidget *parent = 0);
 	~CaseTool();
 
+public slots:
+	void addFD();
+	void addLhsToFd(bool);
+	void addRhsToFd(bool);
+	void numOfAttributes(int num);
+	
 private:
 	Ui::CaseToolClass ui;
 };
