@@ -79,6 +79,8 @@ namespace bernstein {
 	}
 
 	set<FunctionalDependency> obtainMinimalCover(set<FunctionalDependency> fdSet) {
+		fdSet = removeRedundantAttributes(fdSet);
+		fdSet = eliminateTransitiveDependencies(fdSet);
 		return fdSet; 
 	}
 
@@ -90,8 +92,31 @@ namespace bernstein {
 		throw exception();
 	}
 
-	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependencies(set<FunctionalDependency> fdSet) {
-		throw exception();
+	set<FunctionalDependency> dropFdFromSet(set<FunctionalDependency> fdSet, FunctionalDependency fd) {
+		fdSet.erase(fd);
+		return fdSet;
+	}
+
+	set<FunctionalDependency> eliminateTransitiveDependencies(set<FunctionalDependency> startingFdSet) {
+		set<FunctionalDependency> currentFdSet = startingFdSet;
+		for (auto fdIter = startingFdSet.begin(); fdIter != startingFdSet.end(); ++fdIter) {
+			FunctionalDependency currentFd = *fdIter;
+
+			// check if currentFd is redundant
+			// 1. create a set of fd without currentFd
+			set<FunctionalDependency> possibleFdSet = dropFdFromSet(currentFdSet, currentFd);
+			AttributeSet lhs = currentFd.getLhs();
+
+			// 2. and check if the closure of fd's lhs can still get the rhs
+			AttributeSet attrClosure = lhs.getAttributeClosure(possibleFdSet);
+			bool isRedundant = attrClosure.containsAttributes(currentFd.getRhs());
+
+			if (isRedundant) {
+				currentFdSet = possibleFdSet;
+			}
+		}
+
+		return currentFdSet;
 	}
 
 	set<AttributeSet> constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> >) {

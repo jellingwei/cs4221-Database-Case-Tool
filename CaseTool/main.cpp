@@ -13,9 +13,10 @@ void testtest() {
 	set<int> fdLhs;
 	fdLhs.insert(0);
 	fdLhs.insert(1);
+	fdLhs.insert(2);
 
 	set<int> fdRhs;
-	fdRhs.insert(2);
+	fdRhs.insert(3);
 
 	FunctionalDependency fd(fdLhs, fdRhs);
 
@@ -24,6 +25,7 @@ void testtest() {
 
 	set<int> fdRhs1;
 	fdRhs1.insert(1);
+	fdRhs1.insert(2);
 
 	FunctionalDependency fd1(fdLhs1, fdRhs1);
 
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 	CaseTool w;
+	testtest();
 	w.show();
 
 	return a.exec();
