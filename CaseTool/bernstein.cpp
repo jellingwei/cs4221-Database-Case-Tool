@@ -85,7 +85,24 @@ namespace bernstein {
 	}
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitionFd(set<FunctionalDependency> fdSet) {
-		throw exception();
+		unordered_map<AttributeSet, set<FunctionalDependency> > partition;
+
+		for (auto iter = fdSet.begin(); iter != fdSet.end(); ++iter) {
+			FunctionalDependency fd = *iter;
+
+			AttributeSet lhs(fd.getLhs());
+			partition.count(lhs);
+		//	if (partition.count(AttributeSet(fd.getLhs()))) {
+		//		set<FunctionalDependency>& setOfFd = partition.at(fd.getLhs());
+		//		setOfFd.insert(fd);
+		//	} else {
+			//	set<FunctionalDependency> newSet;
+			//	newSet.insert(fd);
+			//	partition[AttributeSet(fd.getLhs())] = newSet;
+		//	}
+		}
+		
+		return partition;
 	}
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > mergeEquivalentKeys(set<FunctionalDependency> fdSet) {

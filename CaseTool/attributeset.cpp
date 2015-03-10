@@ -92,7 +92,7 @@ set<AttributeSet> AttributeSet::constructRelations(set<FunctionalDependency> fdS
 	return constructedRelations;
 }
 
-set<int> AttributeSet::getAttributes() {
+set<int> AttributeSet::getAttributes() const {
 	return attributes;
 }
 
