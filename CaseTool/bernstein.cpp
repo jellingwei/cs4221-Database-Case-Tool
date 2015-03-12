@@ -136,8 +136,10 @@ namespace bernstein {
 				fdRhs = dropAttributeFromAttributeSet(fdRhs, attr);
 			}
 
-			FunctionalDependency newFd = FunctionalDependency(curFd.getLhs(), fdRhs);
-			newFdSet.insert(newFd);
+			if (!fdRhs.getAttributes().empty()) {
+				FunctionalDependency newFd = FunctionalDependency(curFd.getLhs(), fdRhs);
+				newFdSet.insert(newFd);
+			}
 		}
 		return newFdSet;
 	}
@@ -195,8 +197,8 @@ namespace bernstein {
 					// From the notes, this is the step for:
 					//if X -> Z in H  and  Z is in Y,  then delete  X -> Z  from H.
 					//Similarly, if Y ->Z in H and Z in X,  then delete Y -> Z from H.
-					removeAttributesOfEquivalentKeys(fdSet, attrSet2.getAttributes());
-					removeAttributesOfEquivalentKeys(fdSet2, attrSet.getAttributes());
+					fdSet = removeAttributesOfEquivalentKeys(fdSet, attrSet2.getAttributes());
+					fdSet2 = removeAttributesOfEquivalentKeys(fdSet2, attrSet.getAttributes());
 
 					// merge the two fdSets together into fdSet
 					fdSet.insert(fdSet2.begin(), fdSet2.end());
