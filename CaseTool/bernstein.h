@@ -15,7 +15,7 @@ namespace bernstein {
 	set<FunctionalDependency> obtainMinimalCover(set<FunctionalDependency>);
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitionFd(set<FunctionalDependency>);
-	unordered_map<AttributeSet, set<FunctionalDependency> > mergeEquivalentKeys(set<FunctionalDependency>);
+	unordered_map<AttributeSet, set<FunctionalDependency> > mergeEquivalentKeys(unordered_map<AttributeSet, set<FunctionalDependency> >, set<FunctionalDependency>);
 
 	set<AttributeSet> constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> >);
 }

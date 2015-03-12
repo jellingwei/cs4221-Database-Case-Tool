@@ -36,7 +36,9 @@ namespace bernstein {
 	}
 
 
-
+	/**
+	 * Returns an AttributeSet without the attribute attrToDrop
+	 */
 	AttributeSet dropAttributeFromAttributeSet(AttributeSet attrSet, int attrToDrop) {
 		set<int> attributesInAttrSet = attrSet.getAttributes();
 		attributesInAttrSet.erase(attrToDrop);
@@ -44,6 +46,9 @@ namespace bernstein {
 		return AttributeSet(attributesInAttrSet);
 	}
 
+	/**
+	 * Detects redundant attributes in functional dependencies and removes them
+	 */
 	set<FunctionalDependency> bernstein::removeRedundantAttributes(set<FunctionalDependency> fdSet) {
 		set<FunctionalDependency> resultingFdSet = fdSet;
 
@@ -78,12 +83,21 @@ namespace bernstein {
 		return resultingFdSet;
 	}
 
+	/**
+	 * Constructs a minimal cover by removing redundant attributes and funcitonal dependencies
+	 * @sa removeRedundantAttributes
+	 * @sa eliminateTransitiveDependencies
+	 */
 	set<FunctionalDependency> obtainMinimalCover(set<FunctionalDependency> fdSet) {
 		fdSet = removeRedundantAttributes(fdSet);
 		fdSet = eliminateTransitiveDependencies(fdSet);
 		return fdSet; 
 	}
 
+	/**
+	 * Returns a mapping of attributeset to functional dependencies with the attributeSet as its left-hand-side
+	 * That is to say, maps X to a set of {X -> Y}
+	 */
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitionFd(set<FunctionalDependency> fdSet) {
 		unordered_map<AttributeSet, set<FunctionalDependency> > partition;
 
@@ -91,22 +105,110 @@ namespace bernstein {
 			FunctionalDependency fd = *iter;
 
 			AttributeSet lhs(fd.getLhs());
-			partition.count(lhs);
-		//	if (partition.count(AttributeSet(fd.getLhs()))) {
-		//		set<FunctionalDependency>& setOfFd = partition.at(fd.getLhs());
-		//		setOfFd.insert(fd);
-		//	} else {
-			//	set<FunctionalDependency> newSet;
-			//	newSet.insert(fd);
-			//	partition[AttributeSet(fd.getLhs())] = newSet;
-		//	}
+			
+			if (partition.count(AttributeSet(fd.getLhs()))) {
+				set<FunctionalDependency>& setOfFd = partition.at(fd.getLhs());
+				setOfFd.insert(fd);
+			} else {
+				set<FunctionalDependency> newSet;
+				newSet.insert(fd);
+				partition[AttributeSet(fd.getLhs())] = newSet;
+			}
 		}
 		
 		return partition;
 	}
 
-	unordered_map<AttributeSet, set<FunctionalDependency> > mergeEquivalentKeys(set<FunctionalDependency> fdSet) {
-		throw exception();
+	/**
+	 * For every functional dependency, X -> Y, in initialFdSet, if Y contains an attribute from attrsToDrop,
+	 * remove that attribute from Y.
+	 */
+	set<FunctionalDependency> removeAttributesOfEquivalentKeys(set<FunctionalDependency> initialFdSet, set<int> attrsToDrop) {
+		set<FunctionalDependency> newFdSet;
+		// iterate through all the initial function dependencies
+		for (auto fdIter = initialFdSet.begin(); fdIter != initialFdSet.end(); ++fdIter) {
+			FunctionalDependency curFd = *fdIter;
+			// update the rhs of the functional dependency by dropping all attrs from attrsToDrop
+			AttributeSet fdRhs = AttributeSet(curFd.getRhs());
+
+			for (auto attrIter = attrsToDrop.begin(); attrIter != attrsToDrop.end(); ++attrIter) {
+				int attr = *attrIter;
+				fdRhs = dropAttributeFromAttributeSet(fdRhs, attr);
+			}
+
+			FunctionalDependency newFd = FunctionalDependency(curFd.getLhs(), fdRhs);
+			newFdSet.insert(newFd);
+		}
+		return newFdSet;
+	}
+
+	/**
+	 * Detects equivalent keys in a partition by computing closures. 
+	 * X and A are equivalent if X* contains A and A* contains X.
+	 * The partition J, which contains X->A and A->X if X and A are equivalent, 
+	 * is obtained from the mapping by using an empty attribute set as a key. (questionable decision. might need to redo)
+	 *
+	 */
+	unordered_map<AttributeSet, set<FunctionalDependency> > mergeEquivalentKeys(unordered_map<AttributeSet, set<FunctionalDependency> > partitions, set<FunctionalDependency> allFds) {
+		unordered_map<AttributeSet, bool > isAdded;
+		unordered_map<AttributeSet, set<FunctionalDependency> > finalPartition;
+
+		set<int> emptySet;
+		AttributeSet emptyAttrSet(emptySet); // going to use this as J
+
+		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+			AttributeSet attrSet = iter->first;
+			set<FunctionalDependency> fdSet = iter->second;
+			if (isAdded.count(attrSet) != 0 && isAdded[attrSet]) {
+				continue;
+			}
+			isAdded[attrSet] = true;
+
+			AttributeSet closure = attrSet.getAttributeClosure(allFds);
+
+			for (auto iter2 = iter; iter2 != partitions.end(); ++ iter2) {
+				if (iter == iter2) {  // @todo I don't know how to initialise iter2 to be iter + 1
+					continue; 
+				}
+				AttributeSet attrSet2 = iter2->first;
+				set<FunctionalDependency> fdSet2 = iter2->second;
+				AttributeSet closure2 = attrSet2.getAttributeClosure(allFds);
+
+				// if attrSet and atrSet2 are equivalent
+				if (closure.containsAttributes(attrSet2.getAttributes()) && 
+					   closure2.containsAttributes(attrSet.getAttributes())) {
+
+					isAdded[attrSet2] = true;
+					FunctionalDependency fd1(attrSet, attrSet2);
+					FunctionalDependency fd2(attrSet2, attrSet);
+					
+					// add attrSet->attrSet2 and attrSet2->attrSet into J
+					set<FunctionalDependency> equivalentFdSet;
+					if (finalPartition.count(emptyAttrSet) != 0) {
+						equivalentFdSet = finalPartition[emptyAttrSet];
+					}
+					equivalentFdSet.insert(fd1);
+					equivalentFdSet.insert(fd2); 
+					finalPartition[emptyAttrSet] = equivalentFdSet;
+
+					// update fds
+					// From the notes, this is the step for:
+					//if X -> Z in H  and  Z is in Y,  then delete  X -> Z  from H.
+					//Similarly, if Y ->Z in H and Z in X,  then delete Y -> Z from H.
+					removeAttributesOfEquivalentKeys(fdSet, attrSet2.getAttributes());
+					removeAttributesOfEquivalentKeys(fdSet2, attrSet.getAttributes());
+
+					// merge the two fdSets together into fdSet
+					fdSet.insert(fdSet2.begin(), fdSet2.end());
+
+					// Note: since isAdded[fdSet2] is set to true earlier, this prevents fdSet2 from getting inserted later on.
+
+				}
+			}
+			finalPartition[attrSet] = fdSet;
+		}
+
+		return finalPartition;
 	}
 
 	set<FunctionalDependency> dropFdFromSet(set<FunctionalDependency> fdSet, FunctionalDependency fd) {
@@ -114,6 +216,14 @@ namespace bernstein {
 		return fdSet;
 	}
 
+	set<FunctionalDependency> addFdToSet(set<FunctionalDependency> fdSet, FunctionalDependency fd) {
+		fdSet.insert(fd);
+		return fdSet;
+	}
+
+	/**
+	 * Removes redundant dependencies
+	 */
 	set<FunctionalDependency> eliminateTransitiveDependencies(set<FunctionalDependency> startingFdSet) {
 		set<FunctionalDependency> currentFdSet = startingFdSet;
 		for (auto fdIter = startingFdSet.begin(); fdIter != startingFdSet.end(); ++fdIter) {
@@ -136,8 +246,40 @@ namespace bernstein {
 		return currentFdSet;
 	}
 
-	set<AttributeSet> constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> >) {
-		throw exception();
+	// not done yet
+	set<AttributeSet> constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> > partitions) {
+		set<AttributeSet> finalAnswer;
+
+		// In the notes, this is for step 5
+		// need to first add each FD in J to its corresponding group
+		set<int> emptySet; AttributeSet equivalentAttrSet(emptySet);
+		if (partitions.count(equivalentAttrSet) != 0) {
+			set<FunctionalDependency> jFd = partitions[equivalentAttrSet];
+
+			for (auto fdIter = jFd.begin(); fdIter != jFd.end(); ++fdIter) {
+				FunctionalDependency fd = *fdIter;
+
+				AttributeSet lhs = fd.getLhs();
+				bool fdHasCorrespondingGroup = partitions.count(lhs) != 0;
+				if (fdHasCorrespondingGroup) {
+					partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
+					partitions[lhs] = addFdToSet(partitions[lhs], fd);
+				}
+
+			}
+
+		}
+
+
+		// construct relations
+		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+			AttributeSet attrSet = iter->first;
+			set<FunctionalDependency> fdSet = iter->second; 
+			// ....
+
+		}
+
+		throw exception("not implemetned yet");
 	}
 }
 

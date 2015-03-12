@@ -29,11 +29,35 @@ void testtest() {
 
 	FunctionalDependency fd1(fdLhs1, fdRhs1);
 
+	set<int> fdLhs2;
+	fdLhs2.insert(3);
+
+	set<int> fdRhs2;
+	fdRhs2.insert(4);
+
+	FunctionalDependency fd2(fdLhs2, fdRhs2);
+
+	set<int> fdLhs3;
+	fdLhs3.insert(0);
+	fdLhs3.insert(1);
+
+	set<int> fdRhs3;
+	fdRhs3.insert(4);
+
+	FunctionalDependency fd3(fdLhs3, fdRhs3);
+
 	set<FunctionalDependency> fdSet;
 	fdSet.insert(fd); fdSet.insert(fd1);
+	fdSet.insert(fd2); fdSet.insert(fd3);
 
+	qDebug() << QString("!!") ;
 	set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(fdSet);
-	for (auto iter = newFdSet.begin(); iter != newFdSet.end(); ++iter) {
+	
+	//qDebug() << QString("end of step 1") ;
+
+	// step 2?
+	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(newFdSet);
+	for (auto iter = minimalCover.begin(); iter != minimalCover.end(); ++iter) {
 		FunctionalDependency fd = *iter;
 		set<int> lhs = fd.getLhs();
 		set<int> rhs = fd.getRhs();
@@ -48,6 +72,8 @@ void testtest() {
 
 		qDebug() << QString(lhsStr.c_str()) << "->" << QString(rhsStr.c_str()); 
 	}
+	
+
 }
 
 int main(int argc, char *argv[])

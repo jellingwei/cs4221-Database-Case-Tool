@@ -21,16 +21,21 @@ public:
 
 	bool operator<( const FunctionalDependency& fd2 ) const
 	{
-
+		
 		if (lhs < fd2.lhs) {
 			return true;
-		}
-		
-		if (rhs < fd2.rhs) {
-			return true;
-		}
+		} else if (lhs < fd2.lhs) {
+			return false;
+		} else if (lhs == fd2.lhs) {
 
-		return false;
+			if (rhs < fd2.rhs) {
+				return true;
+			} else if (rhs < fd2.rhs) {
+				return false;
+			}
+
+			return false;
+		}
 	}
 
 private:

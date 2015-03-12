@@ -33,6 +33,10 @@ AttributeSet AttributeSet::getAttributeClosure(set<FunctionalDependency> fdSet) 
 	bool isResultSetChanged = true;
 	AttributeSet resultSet(*this); // init the closure with the starting attr
 
+	if (resultSet.getAttributes().size() == 0) {
+		return resultSet;
+	}
+
 	while (isResultSetChanged) {
 		isResultSetChanged = false;
 		for (auto iter = fdSet.begin(); iter != fdSet.end(); ++iter) {
