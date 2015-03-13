@@ -17,10 +17,11 @@ namespace normalTest {
 	int rootFoo(set<FunctionalDependency>, AttributeSet);
 	char runNormalTests(set<FunctionalDependency>, AttributeSet attr);
 	char secondNormalForm(set<FunctionalDependency>, AttributeSet attr);
-	char thirdNormalForm(set<FunctionalDependency>);
-	char boyceCoddNormalForm(set<FunctionalDependency>);
-	char elementaryKeyNormalForm(set<FunctionalDependency>);
+	char thirdNormalForm(set<FunctionalDependency>, AttributeSet attr);
+	char boyceCoddNormalForm(set<FunctionalDependency>, AttributeSet attr);
+	char elementaryKeyNormalForm(set<FunctionalDependency>, AttributeSet attr);
 	int findFactorial(int num);
 	set<int> findNonPrime(set<int> attributes);
-
+	set<int> findPrime();
+	int isSubsetOf(set<int>, set<int>);
 }

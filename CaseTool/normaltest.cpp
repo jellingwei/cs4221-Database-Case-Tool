@@ -10,6 +10,8 @@ namespace normalTest {
 	set<AttributeSet> powerSet;
 	set<AttributeSet> candidateKeys;
 	set<int> nonPrime;
+	set<int> prime;
+	int sizeOfCandi;
 
 	int findFactorial(int num){
 		int result = num;
@@ -25,7 +27,15 @@ namespace normalTest {
 		set<int> attributes = attr.getAttributes();
 		int numberOfCandidateKeys = findCandidateKeys(relation, attr);
 		nonPrime = findNonPrime(attributes);
-		char normalForm = runNormalTests(relation, attr);
+		prime = findPrime();
+		if(nonPrime.empty()){
+			qDebug()<<("no non primes");
+		}
+		//char normalForm = runNormalTests(relation, attr);
+		//char snF = secondNormalForm(relation, attr);
+		char tnF = thirdNormalForm(relation, attr);
+		//qDebug() << QString("char is ") << snF;
+		qDebug() << QString("char is ") << tnF;
 		return numberOfCandidateKeys;
 	}
 	
@@ -231,6 +241,7 @@ namespace normalTest {
 				qDebug()<< QString("candidate key inserted!");
 			}
 		}
+		sizeOfCandi = minimumSize;
 		return candidateKeys.size();
 	}
 
@@ -238,9 +249,9 @@ namespace normalTest {
 	char runNormalTests(set<FunctionalDependency> relation, AttributeSet attr){
 
 		if(secondNormalForm(relation, attr) == '2'){
-			if(thirdNormalForm(relation) == '3'){
-				if(boyceCoddNormalForm(relation) == 'b'){
-					if(elementaryKeyNormalForm(relation) == 'e'){
+			if(thirdNormalForm(relation, attr) == '3'){
+				if(boyceCoddNormalForm(relation, attr) == 'b'){
+					if(elementaryKeyNormalForm(relation, attr) == 'e'){
 						return 'e';
 					}
 					else
@@ -255,34 +266,142 @@ namespace normalTest {
 		return '1';
 	}
 	char secondNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
-		for(auto it = relation.begin(); it!=relation.end(); it++){
-			FunctionalDependency fd = *it;
-			
+		int sNFCondition = 1;
+		if(nonPrime.empty()){
+			sNFCondition = 1;
 		}
-		if(true)
+		else{
+			for(auto it = relation.begin(); it!=relation.end(); it++){
+				FunctionalDependency fd = *it;
+				set<int>rhs = fd.getRhs();
+				set<int>lhs = fd.getLhs();
+				AttributeSet lhsAS(lhs);
+				int i = 1;
+				qDebug() << QString("This is fd number: ") << i++;
+				
+				for(auto it2 = rhs.begin(); it2!=rhs.end(); it2++){
+					int singleAtt = *it2;
+					auto nonPrimeCheck = nonPrime.find(singleAtt);
+				
+					//find if nonprime is fully dependent on candidatek eys
+					if(nonPrimeCheck != nonPrime.end()){
+						auto candiCheck = candidateKeys.find(lhsAS);
+						qDebug() << QString("non prime found");
+						//check if LHS is the whole key
+						if(candiCheck != candidateKeys.end()){
+							qDebug() << QString("non prime dependent on whole key");
+							sNFCondition = 1;		
+						}
+						else{
+							//check if lhs is non prime
+							// if non prime then okay
+							//check if lhs is part of key
+							if(lhs.size() >= sizeOfCandi){
+								sNFCondition = 1;
+								qDebug() << QString("lhs is bigger than key");
+							}
+							else{
+								for(auto itera=candidateKeys.begin(); itera!=candidateKeys.end(); ++itera){
+									set<int> dummy;
+									dummy.insert(99);
+									AttributeSet iteraHolder(dummy);
+									iteraHolder = *itera;
+
+									set<int> candiSet = iteraHolder.getAttributes(); 
+									//below is the case for non prime dependent on part of key
+									if(isSubsetOf(candiSet, lhs)){
+										sNFCondition = 0;
+										break;
+									}
+								}
+								if(sNFCondition == 0){
+									break;
+								}
+							}
+						}
+					
+					}
+				if(sNFCondition == 0){
+					break;
+				}
+			}
+		}
+		}
+		if(sNFCondition)
 			return '2';
 		else
 			return '1';
 	}
-	char thirdNormalForm(set<FunctionalDependency> relation){
-		if(true)
+	char thirdNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
+		int tNFCondition = 1;
+		for(auto it=relation.begin(); it!= relation.end(); ++it){
+			FunctionalDependency fd = *it;
+			set<int>lhs = fd.getLhs();
+			set<int>rhs = fd.getRhs();
+			set<int>superKeySet;
+			int innerCounter = 0;
+			//find if rhs is prime attribute
+			if(isSubsetOf(prime, rhs)){
+				qDebug() << QString("rhs is prime");
+				tNFCondition=1;
+			}
+			else{
+				for(auto it2=superKeys.begin(); it2!=superKeys.end(); ++it2){
+					set<int> dummy;
+					dummy.insert(99);
+					AttributeSet superKey(dummy);
+					superKey = *it2;
+					set<int> superKeySet = superKey.getAttributes();
+					innerCounter++;
+					//int checkSubset = isSubsetOf(superKeySet, lhs);
+					
+					//if(checkSubset){
+						//break;
+					//}
+					if(lhs == superKeySet){
+						break;
+					}
+
+					if(innerCounter == superKeys.size()){
+						tNFCondition = 0;
+					}
+				}
+			}
+			if(tNFCondition == 0){
+				break;
+			}
+		}
+		if(tNFCondition)
 			return '3';
 		else
 			return '2';
 	}
-	char boyceCoddNormalForm(set<FunctionalDependency> relation){
+	char boyceCoddNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
 		if(true)
 			return 'b';
 		else
 			return '3';
 	}
-	char elementaryKeyNormalForm(set<FunctionalDependency> relation){
+	char elementaryKeyNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
 		if(true)
 			return 'e';
 		else
 			return 'b';
 	}
-
+	set<int> findPrime(){
+		set<int> primeSet;
+		for(auto it=candidateKeys.begin(); it!=candidateKeys.end(); ++it){
+			set<int> dummy;
+			dummy.insert(99);
+			AttributeSet candiAS(dummy);
+			candiAS = *it;
+			set<int> candiSet = candiAS.getAttributes();
+			for(auto it2=candiSet.begin(); it2!=candiSet.end(); ++it2){
+				primeSet.insert(*it2);
+			}
+		}
+		return primeSet;
+	}
 	set<int> findNonPrime(set<int> attributes){
 		//attributes to hold all attributes
 		std::stack<int> holdAll;
@@ -323,4 +442,24 @@ namespace normalTest {
 		return nonPrime;
 	}
 
+	int isSubsetOf(set<int> super, set<int> sub){
+		int size = sub.size();
+		int count = 0;
+		for(auto it=sub.begin(); it!= sub.end(); ++it){
+			for(auto it2= super.begin(); it2!= super.end(); it2++){
+				if(*it2 == *it){
+					count++;
+				}
+			}
+		}
+
+		if(size == count){
+			qDebug() << QString("yes subset");
+			return 1;
+		}
+		else{
+			qDebug() << QString("not subset");
+			return 0;
+		}
+	}
 }

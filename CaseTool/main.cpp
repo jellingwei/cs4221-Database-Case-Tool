@@ -137,8 +137,8 @@ void normaltest_test(){
 	qDebug() << QString("fd1 inserted!");
 	fdSett.insert(fd2);
 	qDebug() << QString("fd2 inserted!");
-	fdSett.insert(fd3);
-	qDebug() << QString("fd3 inserted!");
+	//fdSett.insert(fd3);
+	//qDebug() << QString("fd3 inserted!");
 	//qDebug() << QString("Still great");
 	int numResult = normalTest::rootFoo(fdSett, attrSet);
 
