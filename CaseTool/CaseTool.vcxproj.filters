@@ -65,6 +65,9 @@
     <ClCompile Include="normaltest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="relation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="casetool.h">
@@ -94,6 +97,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="normaltest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="relation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

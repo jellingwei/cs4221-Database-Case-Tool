@@ -4,8 +4,7 @@
 #include <functional>
 #include <string>
 #include "functionaldependency.h"
-
-
+#include "relation.h"
 
 using std::set;
 
@@ -13,7 +12,7 @@ class FunctionalDependency;
 
 class AttributeSet {
 public:
-	AttributeSet(set<int>);
+	AttributeSet(set<int> attributes);
 	AttributeSet getAttributeClosure(set<FunctionalDependency>);
 	bool isFdApplicable(FunctionalDependency);
 	bool containsAttributes(set<int>);
@@ -22,7 +21,7 @@ public:
 	set<int> getAttributes() const;
 	int size();
 
-	static set<AttributeSet> constructRelations(set<FunctionalDependency>);
+	static set<Relation> constructRelations(set<FunctionalDependency>);
 
 	bool operator<( const AttributeSet& attributeSet2 ) const
 	{
@@ -39,7 +38,6 @@ public:
 
 private:
 	set<int> attributes;
-
 };
 
 namespace std {
