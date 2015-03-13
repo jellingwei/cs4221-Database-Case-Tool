@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>599</width>
     <height>535</height>
    </rect>
   </property>
@@ -14,16 +14,6 @@
    <string>CaseTool</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QListView" name="listView">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>320</y>
-      <width>231</width>
-      <height>151</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="addFdButton">
     <property name="geometry">
      <rect>
@@ -275,13 +265,23 @@
      </rect>
     </property>
    </widget>
+   <widget class="QListWidget" name="outputList">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>320</y>
+      <width>231</width>
+      <height>151</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>599</width>
      <height>21</height>
     </rect>
    </property>

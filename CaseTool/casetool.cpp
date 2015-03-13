@@ -3,10 +3,12 @@
 
 #include "casetool.h"
 #include "functionaldependency.h"
+#include "bernstein.h"
 
 
 using std::vector;
 using std::set;
+using std::string;
 
 CaseTool::CaseTool(QWidget *parent)
 	: QMainWindow(parent)
@@ -29,7 +31,6 @@ set<FunctionalDependency> functionalDependecies;
 
 void CaseTool::addFD() {
 	FunctionalDependency fd(lhs, rhs);
-
 	functionalDependecies.insert(fd);
 
 	lhs.clear();
@@ -86,9 +87,28 @@ void CaseTool::addRhsToFd(bool isChecked){
 		rhs.insert(2);
 		qDebug() << "C!";
 	}
-
 }
 
 void CaseTool::numOfAttributes(int num) {
 
 }
+
+
+void CaseTool::runBernstein() {
+	set<FunctionalDependency> fdSet = functionalDependecies;
+	// step 1
+	set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(fdSet);
+
+	for (auto iter = newFdSet.begin(); iter != newFdSet.end(); ++iter) {
+		FunctionalDependency fd = *iter;
+		string fdStr = fd.display();
+		QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(fdStr.c_str()));
+
+		ui.outputList->setCurrentItem(item);
+	}
+
+	// step 2...
+
+}
+

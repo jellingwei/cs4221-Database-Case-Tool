@@ -8,6 +8,7 @@
 
 using std::set;
 using std::min_element;
+using std::string;
 
 class AttributeSet;
 
@@ -37,6 +38,8 @@ public:
 			return false;
 		}
 	}
+
+	string display();
 
 private:
 	set<int> lhs;

@@ -91,8 +91,9 @@ void seeOutputSpecificCase() {
 				rhsStr += std::to_string(static_cast<long long>(*iter));
 			}
 
-			qDebug() << QString(lhsStr.c_str()) << "->" << QString(rhsStr.c_str()); 
+			qDebug() << QString(fd.display().c_str());
 		}
+		
 	}
 	
 
