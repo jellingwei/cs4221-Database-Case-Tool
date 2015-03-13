@@ -2,7 +2,7 @@
 
 Relation::Relation(set<int> attr, set<int> relKeys) {
 	attributes = attr;
-	keys = relKeys;
+	keys.insert(relKeys);
 }
 
 int Relation::getRelationSize() const {
@@ -17,6 +17,15 @@ set<int> Relation::getAttributes() {
 	return attributes;
 }
 
-set<int> Relation::getKeys() {
+set<set<int>> Relation::getKeys() {
 	return keys;
+}
+
+bool Relation::insertKey(set<int> key) {
+	if (keys.count(key) == 1) {
+		return true;
+	} else {
+		keys.insert(key);
+		return false;
+	}
 }

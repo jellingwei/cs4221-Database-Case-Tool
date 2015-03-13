@@ -11,7 +11,9 @@ public:
 	int getKeySize() const;
 
 	set<int> getAttributes();
-	set<int> getKeys();
+	set<set<int>> getKeys();
+
+	bool insertKey(set<int> key);  //Returns true if key is already in the relation
 
 	bool operator<( const Relation& relation2 ) const
 	{
@@ -26,5 +28,5 @@ public:
 
 private:
 	set<int> attributes;
-	set<int> keys;
+	set<set<int>> keys;
 };
