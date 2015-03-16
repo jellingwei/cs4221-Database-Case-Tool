@@ -22,7 +22,7 @@ void seeOutputSpecificCase() {
 	set<int> fdRhs;
 	fdRhs.insert(3);
 
-	FunctionalDependency fd(fdLhs, fdRhs);
+	FunctionalDependency fd(fdLhs, fdRhs);				// 012 -> 3
 
 	set<int> fdLhs1;
 	fdLhs1.insert(0);
@@ -31,7 +31,7 @@ void seeOutputSpecificCase() {
 	fdRhs1.insert(1);
 	fdRhs1.insert(2);
 
-	FunctionalDependency fd1(fdLhs1, fdRhs1);
+	FunctionalDependency fd1(fdLhs1, fdRhs1);			// 0 -> 12
 
 	set<int> fdLhs2;
 	fdLhs2.insert(3);
@@ -39,7 +39,7 @@ void seeOutputSpecificCase() {
 	set<int> fdRhs2;
 	fdRhs2.insert(4);
 
-	FunctionalDependency fd2(fdLhs2, fdRhs2);
+	FunctionalDependency fd2(fdLhs2, fdRhs2);			// 3 ->4
 
 	set<int> fdLhs3;
 	fdLhs3.insert(0);
@@ -48,7 +48,7 @@ void seeOutputSpecificCase() {
 	set<int> fdRhs3;
 	fdRhs3.insert(4);
 
-	FunctionalDependency fd3(fdLhs3, fdRhs3);
+	FunctionalDependency fd3(fdLhs3, fdRhs3);			//01 -> 4
 
 	set<int> fdLhs4;
 	fdLhs4.insert(3);
@@ -56,7 +56,7 @@ void seeOutputSpecificCase() {
 	set<int> fdRhs4;
 	fdRhs4.insert(0);
 
-	FunctionalDependency fd4(fdLhs4, fdRhs4);
+	FunctionalDependency fd4(fdLhs4, fdRhs4);			//3->0
 
 	set<FunctionalDependency> fdSet;
 	fdSet.insert(fd); fdSet.insert(fd1);
@@ -95,6 +95,39 @@ void seeOutputSpecificCase() {
 		}
 		
 	}
+
+	// @todo: skip step 5 for now. 
+
+
+	// step 6
+	qDebug() << QString("---final----");
+	set<std::pair<AttributeSet, set<AttributeSet> > > finalAnswer = bernstein::constructRelations(partitions);
+	for (auto partitionIter = finalAnswer.begin(); partitionIter != finalAnswer.end(); ++partitionIter) {
+		AttributeSet attributesInRelation = partitionIter->first;
+		set<AttributeSet> keys = partitionIter->second;
+
+		qDebug() << QString("-------");
+		set<int> attrs = attributesInRelation.getAttributes();
+		string attrsStr;
+		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
+			attrsStr += std::to_string(static_cast<long long>(*iter));
+		}
+		qDebug() << QString(attrsStr.c_str());
+
+
+		qDebug() << QString("keys are:");
+		for (auto iter = keys.begin(); iter != keys.end(); ++iter) {
+			set<int> attrs = (*iter).getAttributes();
+			string attrsStr;
+			for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
+				attrsStr += std::to_string(static_cast<long long>(*iter));
+			}
+			qDebug() << QString(attrsStr.c_str());
+		}
+
+		
+	}
+	
 	
 
 }

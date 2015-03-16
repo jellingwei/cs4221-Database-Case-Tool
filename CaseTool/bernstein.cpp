@@ -248,9 +248,9 @@ namespace bernstein {
 		return currentFdSet;
 	}
 
-	// not done yet
-	set<AttributeSet> constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> > partitions) {
-		set<AttributeSet> finalAnswer;
+	
+	set<std::pair<AttributeSet, set<AttributeSet> > >  constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> > partitions) {
+		set<std::pair<AttributeSet, set<AttributeSet> > > finalAnswer;
 
 		// In the notes, this is for step 5
 		// need to first add each FD in J to its corresponding group
@@ -258,30 +258,52 @@ namespace bernstein {
 		if (partitions.count(equivalentAttrSet) != 0) {
 			set<FunctionalDependency> jFd = partitions[equivalentAttrSet];
 
+			// for every FD in the set J, try to find a corresponding group to add the FD back
 			for (auto fdIter = jFd.begin(); fdIter != jFd.end(); ++fdIter) {
 				FunctionalDependency fd = *fdIter;
 
 				AttributeSet lhs = fd.getLhs();
-				bool fdHasCorrespondingGroup = partitions.count(lhs) != 0;
+				bool fdHasCorrespondingGroup = (partitions.count(lhs) != 0);
 				if (fdHasCorrespondingGroup) {
 					partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
 					partitions[lhs] = addFdToSet(partitions[lhs], fd);
 				}
-
 			}
-
 		}
-
+		// ------ @todo: put the above into a seperate function
 
 		// construct relations
 		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 			AttributeSet attrSet = iter->first;
 			set<FunctionalDependency> fdSet = iter->second; 
-			// ....
+			
+			AttributeSet allAttr(attrSet);
+			set<AttributeSet> allKeys;
 
+			// collect all attributes in fdSet into allAttr, collect all lhs of fd as keys
+			for (auto iter = fdSet.begin(); iter != fdSet.end(); ++iter) {
+				set<int> attributesInAllAttr = allAttr.getAttributes();
+
+				FunctionalDependency fd = *iter;
+				allKeys.insert(AttributeSet(fd.getLhs()));
+
+				set<int> lhs = fd.getLhs();
+				for (auto attrIter = lhs.begin(); attrIter != lhs.end(); ++attrIter) {
+					attributesInAllAttr.insert(*attrIter);
+				}
+				
+				set<int> rhs = fd.getRhs();
+				for (auto attrIter = rhs.begin(); attrIter != rhs.end(); ++attrIter) {
+					attributesInAllAttr.insert(*attrIter);
+				}
+				
+				allAttr = AttributeSet(attributesInAllAttr);		
+			}
+			
+			finalAnswer.insert(std::make_pair<AttributeSet, set<AttributeSet> >(allAttr, allKeys));
 		}
 
-		throw exception("not implemetned yet");
+		return finalAnswer;
 	}
 }
 
