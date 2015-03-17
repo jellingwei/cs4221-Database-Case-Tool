@@ -1,8 +1,8 @@
 #include "relation.h"
 
-Relation::Relation(set<int> attr, set<int> relKeys) {
-	attributes = attr;
-	keys.insert(relKeys);
+Relation::Relation(AttributeSet attr, AttributeSet relKeys) {
+	attributes = attr.getAttributes();
+	keys.insert(relKeys.getAttributes());
 }
 
 int Relation::getRelationSize() const {
@@ -13,19 +13,21 @@ int Relation::getKeySize() const {
 	return keys.size();
 }
 
-set<int> Relation::getAttributes() {
-	return attributes;
+AttributeSet Relation::getAttributes() {
+	AttributeSet returnValue(attributes);
+	return returnValue;
 }
 
-set<set<int>> Relation::getKeys() {
-	return keys;
-}
-
-bool Relation::insertKey(set<int> key) {
-	if (keys.count(key) == 1) {
-		return true;
-	} else {
-		keys.insert(key);
-		return false;
+set<AttributeSet> Relation::getKeys() {
+	set<AttributeSet> returnValue;
+	for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
+		AttributeSet key(*itr);
+		returnValue.insert(key);
 	}
+	return returnValue;
+}
+
+void Relation::insertKey(AttributeSet key) {
+	set<int> keySet = key.getAttributes();
+	keys.insert(keySet);
 }

@@ -1,28 +1,28 @@
 #pragma once
 
 #include <set>
+#include "attributeset.h"
 using std::set;
 
 class Relation {
 public:
-	Relation(set<int> attributes, set<int> keys);
+	Relation(AttributeSet attributes, AttributeSet keys);
 
 	int getRelationSize() const;
 	int getKeySize() const;
 
-	set<int> getAttributes();
-	set<set<int>> getKeys();
+	AttributeSet getAttributes();
+	set<AttributeSet> getKeys();
 
-	bool insertKey(set<int> key);  //Returns true if key is already in the relation
+	void insertKey(AttributeSet key);
 
-	bool operator<( const Relation& relation2 ) const
+	bool operator<( const Relation& relation2 ) const 
 	{
 		return (attributes < relation2.attributes && keys < relation2.keys);
 	}
 
-	bool operator==( const Relation& relation2 ) const
+	bool operator==( const Relation& relation2 ) const 
 	{
-
 		return (attributes == relation2.attributes && keys == relation2.keys);
 	}
 
