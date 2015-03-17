@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>599</width>
-    <height>535</height>
+    <height>656</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>250</y>
+      <y>240</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -30,10 +30,10 @@
    <widget class="QListView" name="listView_2">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>320</y>
-      <width>231</width>
-      <height>151</height>
+      <x>360</x>
+      <y>360</y>
+      <width>211</width>
+      <height>241</height>
      </rect>
     </property>
    </widget>
@@ -180,16 +180,6 @@
      <string>A</string>
     </property>
    </widget>
-   <widget class="QListView" name="listView_3">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>40</y>
-      <width>481</width>
-      <height>61</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QCheckBox" name="rhsAttr2">
     <property name="geometry">
      <rect>
@@ -269,9 +259,32 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>320</y>
-      <width>231</width>
-      <height>151</height>
+      <y>360</y>
+      <width>311</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="runBenstein">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>330</y>
+      <width>121</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Run Bernstein's Algo</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="FDList">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>40</y>
+      <width>531</width>
+      <height>61</height>
      </rect>
     </property>
    </widget>
@@ -509,11 +522,29 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>runBenstein</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CaseToolClass</receiver>
+   <slot>runBernstein()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addLhsToFd(bool)</slot>
   <slot>addFD()</slot>
   <slot>addRhsToFd(bool)</slot>
   <slot>numOfAttributes(int)</slot>
+  <slot>runBernstein()</slot>
+  <slot>showFD(FunctionalDependency)</slot>
  </slots>
 </ui>

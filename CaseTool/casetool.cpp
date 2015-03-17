@@ -1,14 +1,19 @@
 #include <set>
+#include <unordered_map>
+
 #include <qDebug>
 
 #include "casetool.h"
 #include "functionaldependency.h"
 #include "bernstein.h"
+#include "AttributeSet.h"
+
 
 
 using std::vector;
 using std::set;
 using std::string;
+using std::unordered_map;
 
 CaseTool::CaseTool(QWidget *parent)
 	: QMainWindow(parent)
@@ -33,10 +38,32 @@ void CaseTool::addFD() {
 	FunctionalDependency fd(lhs, rhs);
 	functionalDependecies.insert(fd);
 
+	showFD(fd);
+
 	lhs.clear();
 	rhs.clear();
 
+	ui.lhsAttr1->setChecked(false);
+	ui.lhsAttr2->setChecked(false);
+	ui.lhsAttr3->setChecked(false);
+	ui.lhsAttr4->setChecked(false);
+	ui.lhsAttr5->setChecked(false);
+	ui.lhsAttr6->setChecked(false);
+	ui.rhsAttr1->setChecked(false);
+	ui.rhsAttr2->setChecked(false);
+	ui.rhsAttr3->setChecked(false);
+	ui.rhsAttr4->setChecked(false);
+	ui.rhsAttr5->setChecked(false);
+	ui.rhsAttr6->setChecked(false);
+
 	return;
+}
+
+void CaseTool::showFD(FunctionalDependency fd) {
+	QListWidgetItem *item = new QListWidgetItem(QString(fd.display().c_str()), ui.FDList);
+	
+	ui.FDList->setCurrentItem(item);
+
 }
 
 void CaseTool::addLhsToFd(bool isChecked){
@@ -52,15 +79,24 @@ void CaseTool::addLhsToFd(bool isChecked){
 	}
 
 
-	if (name == "lhsAttr1") {
+	if (isChecked && name == "lhsAttr1") {
 		lhs.insert(0);
 		qDebug() << "A!";
-	} else if (name == "lhsAttr2") {
+	} else if (isChecked && name == "lhsAttr2") {
 		lhs.insert(1);
 		qDebug() << "B!";
-	} else if (name == "lhsAttr3") {
+	} else if (isChecked && name == "lhsAttr3") {
 		lhs.insert(2);
 		qDebug() << "C!";
+	} else if (isChecked && name == "lhsAttr4") {
+		lhs.insert(3);
+		qDebug() << "D!";
+	} else if (isChecked && name == "lhsAttr5") {
+		lhs.insert(4);
+		qDebug() << "E!";
+	} else if (isChecked && name == "lhsAttr6") {
+		lhs.insert(5);
+		qDebug() << "F!";
 	}
 }
 
@@ -76,16 +112,24 @@ void CaseTool::addRhsToFd(bool isChecked){
 		qDebug() << "Unchecked RHS!";
 	}
 
-
-	if (name == "rhsAttr1") {
+	if (isChecked && name == "rhsAttr1") {
 		rhs.insert(0);
 		qDebug() << "A!";
-	} else if (name == "rhsAttr2") {
+	} else if (isChecked && name == "rhsAttr2") {
 		rhs.insert(1);
 		qDebug() << "B!";
-	} else if (name == "rhsAttr3") {
+	} else if (isChecked && name == "rhsAttr3") {
 		rhs.insert(2);
 		qDebug() << "C!";
+	} else if (isChecked && name == "rhsAttr4") {
+		rhs.insert(3);
+		qDebug() << "D!";
+	} else if (isChecked && name == "rhsAttr5") {
+		rhs.insert(4);
+		qDebug() << "E!";
+	} else if (isChecked && name == "rhsAttr6") {
+		rhs.insert(5);
+		qDebug() << "F!";
 	}
 }
 
@@ -95,8 +139,17 @@ void CaseTool::numOfAttributes(int num) {
 
 
 void CaseTool::runBernstein() {
+
+	ui.outputList->clear();
+
 	set<FunctionalDependency> fdSet = functionalDependecies;
+
 	// step 1
+	string step1Separator = "Step 1:";
+	QListWidgetItem *item = new QListWidgetItem(QString(step1Separator.c_str()), ui.outputList);
+	item->setData(Qt::UserRole, QString(step1Separator.c_str()));
+
+	ui.outputList->setCurrentItem(item);
 	set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(fdSet);
 
 	for (auto iter = newFdSet.begin(); iter != newFdSet.end(); ++iter) {
@@ -107,8 +160,39 @@ void CaseTool::runBernstein() {
 
 		ui.outputList->setCurrentItem(item);
 	}
-
+	
 	// step 2...
+	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(newFdSet);
+
+	// step 3
+	unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);
+
+	// step 4
+	partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
+
+	// step 6
+	string step6Separator = "Step 6:";
+	item = new QListWidgetItem(QString(step6Separator.c_str()), ui.outputList);
+	item->setData(Qt::UserRole, QString(step6Separator.c_str()));
+
+	ui.outputList->setCurrentItem(item);
+	set<std::pair<AttributeSet, set<AttributeSet> > > finalAnswer = bernstein::constructRelations(partitions);
+
+	for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
+		AttributeSet attrsInRelation = iter->first;
+		set<AttributeSet> keys = iter->second;
+		
+		set<int> attrs = attrsInRelation.getAttributes();
+		string attrsStr;
+		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
+			attrsStr += std::to_string(static_cast<long long>(*iter));
+		}
+
+		QListWidgetItem *item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(attrsStr.c_str()));
+
+		ui.outputList->setCurrentItem(item);
+	}
 
 }
 
