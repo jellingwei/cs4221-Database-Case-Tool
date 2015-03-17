@@ -21,8 +21,6 @@ public:
 	set<int> getAttributes() const;
 	int size();
 
-	static set<Relation> constructRelations(set<FunctionalDependency>);
-
 	bool operator<( const AttributeSet& attributeSet2 ) const
 	{
 		return (attributes < attributeSet2.attributes);
@@ -30,11 +28,20 @@ public:
 
 	bool operator==( const AttributeSet& attributeSet2 ) const
 	{
-
 		return (attributes == attributeSet2.attributes);
 	}
 
-
+	AttributeSet operator-( const AttributeSet& attributeSet2 ) const
+	{
+		set<int> finalAttributes;
+		set<int> beginAttributes = attributes;
+		set<int> set2Attributes = attributeSet2.attributes;
+		for (auto itr = set2Attributes.begin(); itr != set2Attributes.end(); ++itr) {
+			beginAttributes.erase(*itr);
+		}
+		AttributeSet returnValue(finalAttributes);
+		return returnValue;
+	}
 
 private:
 	set<int> attributes;
