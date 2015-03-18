@@ -265,10 +265,18 @@ namespace bernstein {
 				FunctionalDependency fd = *fdIter;
 
 				AttributeSet lhs = fd.getLhs();
-				bool fdHasCorrespondingGroup = (partitions.count(lhs) != 0);
-				if (fdHasCorrespondingGroup) {
+				AttributeSet rhs = fd.getRhs();
+				bool fdHasCorrespondingGroupInLhs = (partitions.count(lhs) != 0);
+				if (fdHasCorrespondingGroupInLhs) {
 					partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
 					partitions[lhs] = addFdToSet(partitions[lhs], fd);
+				} else {
+					bool fdHasCorrespondingGroupInRhs = (partitions.count(rhs) != 0);
+					if (fdHasCorrespondingGroupInRhs) {
+						partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
+						partitions[rhs] = addFdToSet(partitions[rhs], fd);
+					}
+
 				}
 			}
 		}
