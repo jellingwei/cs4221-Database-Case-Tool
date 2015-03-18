@@ -162,7 +162,7 @@ void CaseTool::runBernstein() {
 	}
 	
 	// step 2...
-	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(newFdSet);
+	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(fdSet);
 
 	// step 3
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);

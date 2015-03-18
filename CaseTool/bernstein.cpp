@@ -50,6 +50,8 @@ namespace bernstein {
 	 * Detects redundant attributes in functional dependencies and removes them
 	 */
 	set<FunctionalDependency> bernstein::removeRedundantAttributes(set<FunctionalDependency> fdSet) {
+		// first remove the trivial FDs
+		fdSet = removeTrivialDependencies(fdSet);
 		set<FunctionalDependency> resultingFdSet = fdSet;
 
 		for (auto iter = fdSet.begin(); iter != fdSet.end(); ++iter) {
@@ -305,5 +307,31 @@ namespace bernstein {
 
 		return finalAnswer;
 	}
+
+
+	set<FunctionalDependency> removeTrivialDependencies(set<FunctionalDependency> fdSet) {
+		set<FunctionalDependency> resultingSet;
+
+		for (auto iter = fdSet.begin(); iter != fdSet.end(); ++iter) {
+			FunctionalDependency fd = *iter;
+
+			set<int> lhsAttributes = fd.getLhs();
+			AttributeSet rhsAttributes = AttributeSet(fd.getRhs());
+
+			// remove, from the righthand-side, attributes that are on the left side
+			for (auto attrIter = lhsAttributes.begin(); attrIter != lhsAttributes.end(); ++attrIter) {
+				int attr = *attrIter;
+
+				rhsAttributes = dropAttributeFromAttributeSet(rhsAttributes, attr);
+			}
+
+
+			fd = FunctionalDependency(AttributeSet(lhsAttributes), rhsAttributes);
+			resultingSet.insert(fd);
+		}
+
+		return resultingSet;
+	}
+
 }
 
