@@ -133,10 +133,9 @@ void seeOutputSpecificCase() {
 }
 
 void normaltest_test(){
-	//ab->c, c->d, d->b
-	
-	//ab, ad, ac are keys
-	qDebug() << QString("start of my test");
+	//1st case: ab->c, c->d, d->b
+	//2nd case: ab->c, ac->b
+	//ab, ad, ac are keys for first case
 	set<int> lhs_1;
 	set<int> rhs_1;
 	lhs_1.insert(0);
@@ -147,8 +146,9 @@ void normaltest_test(){
 
 	set<int> lhs_2;
 	set<int> rhs_2;
+	lhs_2.insert(0);
 	lhs_2.insert(2);
-	rhs_2.insert(3);
+	rhs_2.insert(1);
 	FunctionalDependency fd2(lhs_2, rhs_2);
 
 	
@@ -162,22 +162,22 @@ void normaltest_test(){
 	attr.insert(0);
 	attr.insert(1);
 	attr.insert(2);
-	attr.insert(3);
+	//attr.insert(3);
 	AttributeSet attrSet(attr);
 	
 	//theproblem is below
 	set<FunctionalDependency> fdSett;
 	fdSett.insert(fd1);
-	qDebug() << QString("fd1 inserted!");
+	//qDebug() << QString("fd1 inserted!");
 	fdSett.insert(fd2);
-	qDebug() << QString("fd2 inserted!");
-	//fdSett.insert(fd3);
-	//qDebug() << QString("fd3 inserted!");
-	//qDebug() << QString("Still great");
-	int numResult = normalTest::rootFoo(fdSett, attrSet);
+	//qDebug() << QString("fd2 inserted!");
+	//fdSett.insert(fd3); qDebug() << QString("fd3 inserted!");
+	
+	char normalForm = normalTest::rootProcess(fdSett, attrSet);
 
 	//qDebug() << QString("result is: ") << numResult;
 }
+
 
 int main(int argc, char *argv[])
 {

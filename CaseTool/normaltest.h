@@ -14,7 +14,7 @@ namespace normalTest {
 
 
 	int findCandidateKeys(set<FunctionalDependency>, AttributeSet);
-	int rootFoo(set<FunctionalDependency>, AttributeSet);
+	char rootProcess(set<FunctionalDependency>, AttributeSet);
 	char runNormalTests(set<FunctionalDependency>, AttributeSet attr);
 	char secondNormalForm(set<FunctionalDependency>, AttributeSet attr);
 	char thirdNormalForm(set<FunctionalDependency>, AttributeSet attr);
