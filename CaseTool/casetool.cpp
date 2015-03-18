@@ -170,6 +170,9 @@ void CaseTool::runBernstein() {
 	// step 4
 	partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
 
+	// step 5
+	partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, minimalCover);
+
 	// step 6
 	string step6Separator = "Step 6:";
 	item = new QListWidgetItem(QString(step6Separator.c_str()), ui.outputList);

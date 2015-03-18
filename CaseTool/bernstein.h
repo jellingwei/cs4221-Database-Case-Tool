@@ -18,6 +18,6 @@ namespace bernstein {
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitionFd(set<FunctionalDependency>);
 	unordered_map<AttributeSet, set<FunctionalDependency> > mergeEquivalentKeys(unordered_map<AttributeSet, set<FunctionalDependency> >, set<FunctionalDependency>);
 	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependencies(unordered_map<AttributeSet, set<FunctionalDependency> >, set<FunctionalDependency>);
-
+	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependenciesForPartition(unordered_map<AttributeSet, set<FunctionalDependency> > , set<FunctionalDependency> ); // for step 5
 	set<std::pair<AttributeSet, set<AttributeSet> > > constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> >);
 }

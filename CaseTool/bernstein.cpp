@@ -1,5 +1,6 @@
 #include <cassert>
 #include <exception>
+#include <algorithm>
 
 #include "bernstein.h"
 
@@ -248,6 +249,42 @@ namespace bernstein {
 		}
 
 		return currentFdSet;
+	}
+
+	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependenciesForPartition(unordered_map<AttributeSet, set<FunctionalDependency> > partitions, set<FunctionalDependency> allFd) {
+		set<FunctionalDependency> currentFdSet = allFd;
+		unordered_map<AttributeSet, set<FunctionalDependency> > finalPartitions = partitions;
+
+		// iterate over all FDs, when a FD is redundant, iterate over all partitions and drop it if its found
+		// inefficient but it should work
+		// @todo speed up
+		for (auto fdIter = allFd.begin(); fdIter != allFd.end(); ++fdIter) {
+			FunctionalDependency currentFd = *fdIter;
+
+			// check if currentFd is redundant
+			// 1. create a set of fd without currentFd
+			set<FunctionalDependency> possibleFdSet = dropFdFromSet(currentFdSet, currentFd);
+			AttributeSet lhs = currentFd.getLhs();
+
+			// 2. and check if the closure of fd's lhs can still get the rhs
+			AttributeSet attrClosure = lhs.getAttributeClosure(possibleFdSet);
+			bool isRedundant = attrClosure.containsAttributes(currentFd.getRhs());
+
+			if (isRedundant) {
+				currentFdSet = possibleFdSet; // drop from full set of FD
+
+				for (auto partitionIter = partitions.begin(); partitionIter != partitions.end(); ++partitionIter) {
+					set<FunctionalDependency> fdsInPartition = partitionIter->second;
+					fdsInPartition = dropFdFromSet(fdsInPartition, currentFd);
+					finalPartitions[partitionIter->first] = fdsInPartition;
+
+				}
+			}
+
+			partitions = finalPartitions;
+		}
+
+		return partitions;
 	}
 
 	
