@@ -162,16 +162,81 @@ void CaseTool::runBernstein() {
 	}
 	
 	// step 2...
+	string step2Separator = "Step 2:";
+	QListWidgetItem *stepWidget2 = new QListWidgetItem(QString(step2Separator.c_str()), ui.outputList);
+	//item->setData(Qt::UserRole, QString(step2Separator.c_str()));
+
+	ui.outputList->setCurrentItem(stepWidget2);
 	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(fdSet);
+	for (auto iter = minimalCover.begin(); iter != minimalCover.end(); ++iter) {
+		FunctionalDependency fd = *iter;
+		string fdStr = fd.display();
+		QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(fdStr.c_str()));
+
+		ui.outputList->setCurrentItem(item);
+	}
 
 	// step 3
+	string step3Separator = "Step 3:";
+	QListWidgetItem *stepWidget3 = new QListWidgetItem(QString(step3Separator.c_str()), ui.outputList);
+	ui.outputList->setCurrentItem(stepWidget3);
+
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);
+	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+		set<FunctionalDependency> fdSet = iter->second;
+
+		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
+			FunctionalDependency fd = *fdIter;
+			string fdStr = fd.display();
+			QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
+			item->setData(Qt::UserRole, QString(fdStr.c_str()));
+
+			ui.outputList->setCurrentItem(item);
+		}
+	}
+
 
 	// step 4
+	string step4Separator = "Step 4:";
+	QListWidgetItem *stepWidget4 = new QListWidgetItem(QString(step4Separator.c_str()), ui.outputList);
+	ui.outputList->setCurrentItem(stepWidget4);
+
 	partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
+	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+		set<FunctionalDependency> fdSet = iter->second;
+
+		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
+			FunctionalDependency fd = *fdIter;
+			string fdStr = fd.display();
+			QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
+			item->setData(Qt::UserRole, QString(fdStr.c_str()));
+
+			ui.outputList->setCurrentItem(item);
+		}
+	}
 
 	// step 5
-	partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, minimalCover);
+	string step5Separator = "Step 5:";
+	QListWidgetItem *stepWidget5 = new QListWidgetItem(QString(step5Separator.c_str()), ui.outputList);
+	ui.outputList->setCurrentItem(stepWidget5);
+
+	set<int> emptySet;
+
+	set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);
+	partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);
+	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+		set<FunctionalDependency> fdSet = iter->second;
+
+		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
+			FunctionalDependency fd = *fdIter;
+			string fdStr = fd.display();
+			QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
+			item->setData(Qt::UserRole, QString(fdStr.c_str()));
+
+			ui.outputList->setCurrentItem(item);
+		}
+	}
 
 	// step 6
 	string step6Separator = "Step 6:";

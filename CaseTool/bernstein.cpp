@@ -251,6 +251,21 @@ namespace bernstein {
 		return currentFdSet;
 	}
 
+	set<FunctionalDependency> createSetOfFDFromPartitions(unordered_map<AttributeSet, set<FunctionalDependency> > partitions) {
+		set<FunctionalDependency> fdSet;
+		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+			set<FunctionalDependency> fdInPartition = iter->second;
+
+			fdSet.insert(fdInPartition.begin(), fdInPartition.end());
+		}
+		return fdSet;
+	}
+
+
+	/**
+	 * The second parameter is the result from createSetOfFDFromPartitions.
+	 * 
+	 */
 	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependenciesForPartition(unordered_map<AttributeSet, set<FunctionalDependency> > partitions, set<FunctionalDependency> allFd) {
 		set<FunctionalDependency> currentFdSet = allFd;
 		unordered_map<AttributeSet, set<FunctionalDependency> > finalPartitions = partitions;
@@ -269,6 +284,7 @@ namespace bernstein {
 			// 2. and check if the closure of fd's lhs can still get the rhs
 			AttributeSet attrClosure = lhs.getAttributeClosure(possibleFdSet);
 			bool isRedundant = attrClosure.containsAttributes(currentFd.getRhs());
+			
 
 			if (isRedundant) {
 				currentFdSet = possibleFdSet; // drop from full set of FD
@@ -370,9 +386,10 @@ namespace bernstein {
 				rhsAttributes = dropAttributeFromAttributeSet(rhsAttributes, attr);
 			}
 
-
-			fd = FunctionalDependency(AttributeSet(lhsAttributes), rhsAttributes);
-			resultingSet.insert(fd);
+			if (!rhsAttributes.getAttributes().empty()) {
+				fd = FunctionalDependency(AttributeSet(lhsAttributes), rhsAttributes);
+				resultingSet.insert(fd);
+			}
 		}
 
 		return resultingSet;
