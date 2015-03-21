@@ -38,7 +38,11 @@ void CaseTool::addFD() {
 	FunctionalDependency fd(lhs, rhs);
 	functionalDependecies.insert(fd);
 
-	showFD(fd);
+	if(!lhs.empty() && !rhs.empty()) {
+		showFD(fd);
+	} else {
+		qDebug() << "lhs or rhs is empty";
+	}
 
 	lhs.clear();
 	rhs.clear();
@@ -133,7 +137,7 @@ void CaseTool::addRhsToFd(bool isChecked){
 	}
 }
 
-void CaseTool::numOfAttributes(int num) {
+void CaseTool::numOfAttributes() {
 
 }
 

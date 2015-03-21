@@ -245,16 +245,6 @@
      <string>F</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="attributeNum">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>110</y>
-      <width>51</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QListWidget" name="outputList">
     <property name="geometry">
      <rect>
@@ -285,6 +275,16 @@
       <y>40</y>
       <width>531</width>
       <height>61</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="numOfAttributes">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>110</y>
+      <width>42</width>
+      <height>22</height>
      </rect>
     </property>
    </widget>
@@ -538,13 +538,29 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>CaseToolClass</sender>
+   <signal>iconSizeChanged(QSize)</signal>
+   <receiver>CaseToolClass</receiver>
+   <slot>numOfAttributes()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>142</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>243</x>
+     <y>137</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addLhsToFd(bool)</slot>
   <slot>addFD()</slot>
   <slot>addRhsToFd(bool)</slot>
-  <slot>numOfAttributes(int)</slot>
   <slot>runBernstein()</slot>
   <slot>showFD(FunctionalDependency)</slot>
+  <slot>numOfAttributes()</slot>
  </slots>
 </ui>

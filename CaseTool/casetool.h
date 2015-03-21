@@ -20,7 +20,7 @@ public slots:
 	void showFD(FunctionalDependency fd);
 	void addLhsToFd(bool);
 	void addRhsToFd(bool);
-	void numOfAttributes(int num);
+	void numOfAttributes();
 	void runBernstein();
 	
 private:
