@@ -1,6 +1,9 @@
 #include <set>
 #include <unordered_map>
+#include <sstream>
 
+#include <QVBoxLayout>
+#include <QCheckBox>
 #include <qDebug>
 
 #include "casetool.h"
@@ -31,6 +34,11 @@ CaseTool::~CaseTool()
 
 set<int> lhs;
 set<int> rhs;
+int numAttributes;
+
+vector<QCheckBox*> lhsCheckBox;
+vector<QCheckBox*> rhsCheckBox;
+
 
 set<FunctionalDependency> functionalDependecies;
 
@@ -47,18 +55,13 @@ void CaseTool::addFD() {
 	lhs.clear();
 	rhs.clear();
 
-	ui.lhsAttr1->setChecked(false);
-	ui.lhsAttr2->setChecked(false);
-	ui.lhsAttr3->setChecked(false);
-	ui.lhsAttr4->setChecked(false);
-	ui.lhsAttr5->setChecked(false);
-	ui.lhsAttr6->setChecked(false);
-	ui.rhsAttr1->setChecked(false);
-	ui.rhsAttr2->setChecked(false);
-	ui.rhsAttr3->setChecked(false);
-	ui.rhsAttr4->setChecked(false);
-	ui.rhsAttr5->setChecked(false);
-	ui.rhsAttr6->setChecked(false);
+	for (auto iter  = lhsCheckBox.begin(); iter != lhsCheckBox.end(); ++iter) {
+		(*iter)->setChecked(false);
+	}
+
+	for (auto iter  = rhsCheckBox.begin(); iter != rhsCheckBox.end(); ++iter) {
+		(*iter)->setChecked(false);
+	}
 
 	return;
 }
@@ -82,26 +85,17 @@ void CaseTool::addLhsToFd(bool isChecked){
 		qDebug() << "Unchecked LHS!";
 	}
 
+	for (int i = 0; i < numAttributes; i++) {
+		string attrName = "lhsAttr";
+		attrName += std::to_string(static_cast<long long>(i + 1));
+		QString qstr = QString::fromStdString(attrName);
 
-	if (isChecked && name == "lhsAttr1") {
-		lhs.insert(0);
-		qDebug() << "A!";
-	} else if (isChecked && name == "lhsAttr2") {
-		lhs.insert(1);
-		qDebug() << "B!";
-	} else if (isChecked && name == "lhsAttr3") {
-		lhs.insert(2);
-		qDebug() << "C!";
-	} else if (isChecked && name == "lhsAttr4") {
-		lhs.insert(3);
-		qDebug() << "D!";
-	} else if (isChecked && name == "lhsAttr5") {
-		lhs.insert(4);
-		qDebug() << "E!";
-	} else if (isChecked && name == "lhsAttr6") {
-		lhs.insert(5);
-		qDebug() << "F!";
+		if (isChecked && name==qstr) {
+			lhs.insert(i);
+			qDebug() << i;
+		}
 	}
+
 }
 
 void CaseTool::addRhsToFd(bool isChecked){
@@ -116,31 +110,96 @@ void CaseTool::addRhsToFd(bool isChecked){
 		qDebug() << "Unchecked RHS!";
 	}
 
-	if (isChecked && name == "rhsAttr1") {
-		rhs.insert(0);
-		qDebug() << "A!";
-	} else if (isChecked && name == "rhsAttr2") {
-		rhs.insert(1);
-		qDebug() << "B!";
-	} else if (isChecked && name == "rhsAttr3") {
-		rhs.insert(2);
-		qDebug() << "C!";
-	} else if (isChecked && name == "rhsAttr4") {
-		rhs.insert(3);
-		qDebug() << "D!";
-	} else if (isChecked && name == "rhsAttr5") {
-		rhs.insert(4);
-		qDebug() << "E!";
-	} else if (isChecked && name == "rhsAttr6") {
-		rhs.insert(5);
-		qDebug() << "F!";
+	for (int i = 0; i < numAttributes; i++) {
+		string attrName = "rhsAttr";
+		attrName += std::to_string(static_cast<long long>(i + 1));
+		QString qstr = QString::fromStdString(attrName);
+
+		if (isChecked && name==qstr) {
+			rhs.insert(i);
+			qDebug() << i;
+		}
 	}
 }
 
-void CaseTool::numOfAttributes() {
-
+void clearLayout(QLayout *layout){
+    QLayoutItem *item;
+    while((item = layout->takeAt(0))) {
+        if (item->layout()) {
+            clearLayout(item->layout());
+            delete item->layout();
+        }
+        if (item->widget()) {
+            delete item->widget();
+        }
+        delete item;
+    }
 }
 
+string getTextOfCheckbox(int i) {
+	char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+	std::stringstream ss;
+	ss << i_char;
+	string stringToDisplay;
+	ss >> stringToDisplay;
+	return stringToDisplay;
+}
+
+void CaseTool::numOfAttributes() {
+	numAttributes = ui.numOfAttributes->value();
+
+	if (ui.scrollArea->layout() != NULL) {
+		clearLayout(ui.scrollArea->layout());
+		lhsCheckBox.clear();
+
+		delete ui.scrollArea->layout();
+	}
+
+	if (ui.scrollArea2->layout() != NULL) {
+		clearLayout(ui.scrollArea2->layout());
+		rhsCheckBox.clear();
+
+		delete ui.scrollArea2->layout() ;
+	}
+
+	QVBoxLayout *lay = new QVBoxLayout(this);
+	lay->setDirection(QBoxLayout::LeftToRight);
+	for(int i=0; i < numAttributes; i++)
+	{
+		QCheckBox* dynamic = new QCheckBox("");
+		string name = "lhsAttr";
+		name += std::to_string(static_cast<long long>(i + 1));
+		dynamic->setObjectName(QString(name.c_str()));
+		qDebug() <<QString(name.c_str());
+		dynamic->setChecked (false);
+		dynamic->setText (QString(getTextOfCheckbox(i).c_str()));
+		lay->addWidget(dynamic);
+
+		QObject::connect(dynamic, SIGNAL(clicked(bool)), SLOT(addLhsToFd(bool)));
+
+		lhsCheckBox.push_back(dynamic);
+	}
+	ui.scrollArea->setLayout(lay);
+
+	QVBoxLayout *lay2 = new QVBoxLayout(this);
+	lay2->setDirection(QBoxLayout::LeftToRight);
+	for(int i=0; i < numAttributes; i++)
+	{
+		QCheckBox* dynamic = new QCheckBox("");
+		string name = "rhsAttr";
+		name += std::to_string(static_cast<long long>(i + 1));
+		dynamic->setObjectName(QString(name.c_str()));
+		qDebug() <<QString(name.c_str());
+		dynamic->setChecked (false);
+		dynamic->setText (QString(getTextOfCheckbox(i).c_str()));
+		lay2->addWidget(dynamic);
+
+		QObject::connect(dynamic, SIGNAL(clicked(bool)), SLOT(addRhsToFd(bool)));
+
+		rhsCheckBox.push_back(dynamic);
+	}
+	ui.scrollArea2->setLayout(lay2);
+}
 
 void CaseTool::runBernstein() {
 
