@@ -311,6 +311,9 @@ void CaseTool::runBernstein() {
 
 			ui.outputList->setCurrentItem(item);
 		}
+		QListWidgetItem *item = new QListWidgetItem(QString("--------"), ui.outputList);
+
+		ui.outputList->setCurrentItem(item);
 	}
 
 	// step 5

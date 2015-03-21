@@ -26,13 +26,13 @@ public:
 	{
 		if (lhs < fd2.lhs) {
 			return true;
-		} else if (lhs < fd2.lhs) {
+		} else if (lhs > fd2.lhs) {
 			return false;
 		} else if (lhs == fd2.lhs) {
 
 			if (rhs < fd2.rhs) {
 				return true;
-			} else if (rhs < fd2.rhs) {
+			} else if (rhs > fd2.rhs) {
 				return false;
 			}
 			return false;
