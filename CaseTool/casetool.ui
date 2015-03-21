@@ -107,7 +107,7 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>571</width>
+      <width>381</width>
       <height>61</height>
      </rect>
     </property>
@@ -220,6 +220,19 @@
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="resetButton">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>60</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Reset</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -326,6 +339,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>resetButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CaseToolClass</receiver>
+   <slot>reset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>451</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>517</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runLTK</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CaseToolClass</receiver>
+   <slot>runLTK()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>398</x>
+     <y>367</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>484</x>
+     <y>319</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addLhsToFd(bool)</slot>
@@ -335,5 +380,7 @@
   <slot>showFD(FunctionalDependency)</slot>
   <slot>numOfAttributes()</slot>
   <slot>runNormalFormTester()</slot>
+  <slot>reset()</slot>
+  <slot>runLTK()</slot>
  </slots>
 </ui>

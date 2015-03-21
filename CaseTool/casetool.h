@@ -21,6 +21,7 @@ public slots:
 	void addLhsToFd(bool);
 	void addRhsToFd(bool);
 	void numOfAttributes();
+	void reset();
 	void runLTK();
 	void runNormalFormTester();
 	void runBernstein();

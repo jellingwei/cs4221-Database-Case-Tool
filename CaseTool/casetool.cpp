@@ -151,6 +151,7 @@ void CaseTool::numOfAttributes() {
 	if (ui.scrollArea->layout() != NULL) {
 		clearLayout(ui.scrollArea->layout());
 		lhsCheckBox.clear();
+		lhs.clear();
 
 		delete ui.scrollArea->layout();
 	}
@@ -158,6 +159,7 @@ void CaseTool::numOfAttributes() {
 	if (ui.scrollArea2->layout() != NULL) {
 		clearLayout(ui.scrollArea2->layout());
 		rhsCheckBox.clear();
+		rhs.clear();
 
 		delete ui.scrollArea2->layout() ;
 	}
@@ -199,6 +201,16 @@ void CaseTool::numOfAttributes() {
 		rhsCheckBox.push_back(dynamic);
 	}
 	ui.scrollArea2->setLayout(lay2);
+}
+
+void CaseTool::reset() {
+	functionalDependecies.clear();
+
+	ui.FDList->clear();
+	ui.outputList->clear();
+	ui.outputLTK->clear();
+	ui.outputNF->clear();
+	numOfAttributes();
 }
 
 void CaseTool::runLTK() {
