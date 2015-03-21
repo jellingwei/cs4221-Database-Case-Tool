@@ -64,8 +64,6 @@ namespace ltk {
 	set<AttributeSet> superfluousAttributeDetection(Relation preparatoryRelation, AttributeSet singleAttribute) {
 		//Mark attribute as superfluous
 		bool isSuperfluous = true;
-		set<int> singleAttributeSet = singleAttribute.getAttributes();
-		int singleAttributeValue = *(singleAttributeSet.begin());
 		AttributeSet prepRelationAttributes = preparatoryRelation.getAttributes();
 		set<AttributeSet> prepRelationKeys = preparatoryRelation.getKeys();
 		set<AttributeSet> reducedSynthesizedKeys;
@@ -74,7 +72,7 @@ namespace ltk {
 		//Take all synthesized keys except those with the single attribute
 		for (auto itr = prepRelationKeys.begin(); itr != prepRelationKeys.end(); ++itr) {
 			AttributeSet synthesizedKey = *itr;
-			if (!synthesizedKey.containsAttributes(singleAttributeSet)) {
+			if (!synthesizedKey.containsAttributes(singleAttribute)) {
 				reducedSynthesizedKeys.insert(synthesizedKey);
 			}
 		}
@@ -93,23 +91,24 @@ namespace ltk {
 			lostKeys.erase(*keyItr);
 		}
 		
-		isSuperfluous = false;  //Use this boolean to indicate if there is such a key where key determines singleAttribute
 		for (auto itr = lostKeys.begin(); itr != lostKeys.end(); ++itr) {
 			AttributeSet key = *itr;
-			AttributeSet attrClosure = key.getAttributeClosure(reducedSynthesizedFDs);
-			if (attrClosure == prepRelationAttributes) {
-				continue;
+			AttributeSet keyClosure = key.getAttributeClosure(reducedSynthesizedFDs);
+			if (keyClosure.containsAttributes(prepRelationAttributes)) {
+				continue;  //Skip for this key
 			} else {
-				AttributeSet reducedLHS = attrClosure.intersect(prepRelationAttributes) - singleAttribute;
+				AttributeSet reducedLHS = keyClosure.intersect(prepRelationAttributes) - singleAttribute;
 				AttributeSet globalClosure = reducedLHS.getAttributeClosure(getGlobalFDs());
-				if (globalClosure == prepRelationAttributes) {
-					for (auto keyItr = prepRelationKeys.begin(); keyItr != prepRelationKeys.end(); ++keyItr) {
+
+				if (globalClosure.containsAttributes(prepRelationAttributes)) {
+					return reducedSynthesizedKeys;
+					/*for (auto keyItr = prepRelationKeys.begin(); keyItr != prepRelationKeys.end(); ++keyItr) {
 						AttributeSet initialKey = *keyItr;
 						if (globalClosure.containsAttributes(initialKey)) {
 							reducedSynthesizedKeys.insert(initialKey);
 							return reducedSynthesizedKeys;
 						}
-					}
+					}*/
 				} else {
 					isSuperfluous = false;
 					break;
@@ -117,8 +116,12 @@ namespace ltk {
 			}
 		}
 
-		set<AttributeSet> empty;
-		return empty;
+		if (isSuperfluous) {
+			set<AttributeSet> empty;
+			return empty;
+		} else {
+			return reducedSynthesizedKeys;
+		}
 	}
 
 	set<FunctionalDependency> getGlobalFDs() {
@@ -208,7 +211,7 @@ namespace ltk {
 				int singleAttributeValue = *attributesItr;
 				set<int> singleSet;
 				singleSet.insert(singleAttributeValue);
-				AttributeSet singleAttribute(singleSet);;
+				AttributeSet singleAttribute(singleSet);
 				set<AttributeSet> returnedKeys = superfluousAttributeDetection(relation, singleAttribute);
 				if (returnedKeys.size() != 0) {
 					finalAttributes = attributes - singleAttribute;
