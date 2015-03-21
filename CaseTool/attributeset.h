@@ -24,6 +24,8 @@ public:
 	set<int> getAttributes() const;
 	int size();
 
+	string toString();
+
 	bool operator<( const AttributeSet& attributeSet2 ) const
 	{
 		return (attributes < attributeSet2.attributes);
