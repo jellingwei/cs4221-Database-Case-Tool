@@ -26,6 +26,15 @@ set<int> FunctionalDependency::getRhs() {
 	return rhs;
 }
 
+AttributeSet FunctionalDependency::getLhsAttrSet() {
+	AttributeSet lhsAttr(lhs);
+	return lhsAttr;
+}
+
+AttributeSet FunctionalDependency::getRhsAttrSet() {
+	AttributeSet rhsAttr(rhs);
+	return rhsAttr;
+}
 
 string FunctionalDependency::display() {
 	

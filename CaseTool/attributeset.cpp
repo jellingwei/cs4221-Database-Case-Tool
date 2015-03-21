@@ -6,6 +6,10 @@
 #include "attributeset.h"
 
 
+AttributeSet::AttributeSet() {
+	//Empty default constructor
+}
+
 AttributeSet::AttributeSet(set<int> attr) {
 	attributes = attr;
 }
@@ -27,6 +31,26 @@ bool AttributeSet::containsAttributes(set<int> attr) {
 					 std::inserter(intersect, intersect.begin()));
 	
 	return intersect.size() == attr.size();
+}
+
+bool AttributeSet::containsAttributes(AttributeSet attr) {
+	set<int> intersect;
+	set<int> attributes = attr.getAttributes();
+	set_intersection(this->attributes.begin(), this->attributes.end(),
+		attributes.begin(), attributes.end(), 
+		std::inserter(intersect, intersect.begin()));
+
+	return intersect.size() == attributes.size();
+}
+
+AttributeSet AttributeSet::intersect(AttributeSet attrSet) {
+	set<int> intersect;
+	set<int> set2 = attrSet.getAttributes();
+	set_intersection(this->attributes.begin(), this->attributes.end(), 
+					 set2.begin(), set2.end(), 
+					 std::inserter(intersect, intersect.begin()));
+	AttributeSet setIntersect(intersect);
+	return setIntersect;
 }
 
 AttributeSet AttributeSet::getAttributeClosure(set<FunctionalDependency> fdSet) {

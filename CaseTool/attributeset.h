@@ -12,11 +12,14 @@ class FunctionalDependency;
 
 class AttributeSet {
 public:
+	AttributeSet();
 	AttributeSet(set<int> attributes);
 	AttributeSet getAttributeClosure(set<FunctionalDependency>);
 	bool isFdApplicable(FunctionalDependency);
 	bool containsAttributes(set<int>);
+	bool containsAttributes(AttributeSet);
 
+	AttributeSet intersect(AttributeSet);
 	AttributeSet addAttributesToSet(AttributeSet);
 	set<int> getAttributes() const;
 	int size();
@@ -33,13 +36,24 @@ public:
 
 	AttributeSet operator-( const AttributeSet& attributeSet2 ) const
 	{
-		set<int> finalAttributes;
 		set<int> beginAttributes = attributes;
 		set<int> set2Attributes = attributeSet2.attributes;
 		for (auto itr = set2Attributes.begin(); itr != set2Attributes.end(); ++itr) {
 			beginAttributes.erase(*itr);
 		}
-		AttributeSet returnValue(finalAttributes);
+		AttributeSet returnValue(beginAttributes);
+		return returnValue;
+	}
+	
+	//Use + operator to perform union
+	AttributeSet operator+( const AttributeSet& attributeSet2 ) const
+	{
+		set<int> beginAttributes = attributes;
+		set<int> set2Attributes = attributeSet2.attributes;
+		for (auto itr = set2Attributes.begin(); itr != set2Attributes.end(); ++itr) {
+			beginAttributes.insert(*itr);
+		}
+		AttributeSet returnValue(beginAttributes);
 		return returnValue;
 	}
 

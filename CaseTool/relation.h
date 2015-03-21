@@ -6,7 +6,8 @@ using std::set;
 
 class Relation {
 public:
-	Relation(AttributeSet attributes, AttributeSet keys);
+	Relation(AttributeSet attributes, AttributeSet key);
+	Relation(AttributeSet attributes, set<AttributeSet> keys);
 
 	int getRelationSize() const;
 	int getKeySize() const;

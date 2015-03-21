@@ -1,8 +1,16 @@
 #include "relation.h"
 
-Relation::Relation(AttributeSet attr, AttributeSet relKeys) {
+Relation::Relation(AttributeSet attr, AttributeSet relKey) {
 	attributes = attr.getAttributes();
-	keys.insert(relKeys.getAttributes());
+	keys.insert(relKey.getAttributes());
+}
+
+Relation::Relation(AttributeSet attr, set<AttributeSet> keys) {
+	attributes = attr.getAttributes();
+	for (auto keysItr = keys.begin(); keysItr != keys.end(); ++keysItr) {
+		AttributeSet key = *keysItr;
+		keys.insert(key.getAttributes());
+	}
 }
 
 int Relation::getRelationSize() const {
