@@ -12,7 +12,7 @@ namespace bernstein {
 
 	set<FunctionalDependency> removeTrivialDependencies(set<FunctionalDependency> fdSet);
 	set<FunctionalDependency> removeRedundantAttributes(set<FunctionalDependency>);
-	set<FunctionalDependency>  eliminateTransitiveDependencies(set<FunctionalDependency>);
+	set<FunctionalDependency> eliminateTransitiveDependencies(set<FunctionalDependency>);
 	set<FunctionalDependency> obtainMinimalCover(set<FunctionalDependency>);
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitionFd(set<FunctionalDependency>);
@@ -22,4 +22,7 @@ namespace bernstein {
 	set<FunctionalDependency> createSetOfFDFromPartitions(unordered_map<AttributeSet, set<FunctionalDependency> >);
 	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependenciesForPartition(unordered_map<AttributeSet, set<FunctionalDependency> > , set<FunctionalDependency> ); // for step 5
 	set<std::pair<AttributeSet, set<AttributeSet> > > constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> >);
+
+	set<AttributeSet> findCandidateKeys(set<std::pair<AttributeSet, set<AttributeSet> > >, set<FunctionalDependency> ); 
+	std::pair<AttributeSet, set<AttributeSet> >  constructMissingAttrRelation(set<std::pair<AttributeSet, set<AttributeSet> > >, int sizeOfAttrs, AttributeSet key);
 }

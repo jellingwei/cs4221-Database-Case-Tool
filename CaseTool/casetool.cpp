@@ -203,6 +203,7 @@ void CaseTool::numOfAttributes() {
 	ui.scrollArea2->setLayout(lay2);
 }
 
+
 void CaseTool::reset() {
 	functionalDependecies.clear();
 
@@ -234,6 +235,21 @@ void CaseTool::runNormalFormTester() {
 	item->setData(Qt::UserRole, ans);
 
 	ui.outputNF->setCurrentItem(item);
+}
+
+AttributeSet getSmallestKey(set<AttributeSet> candidateKeys) {
+	AttributeSet answer;
+	bool isSet = false;
+
+	for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
+		if (!isSet || iter->getAttributes().size() < answer.getAttributes().size()) {
+			answer = *iter;
+			isSet = true;
+		}
+	}
+
+	return answer;
+
 }
 
 void CaseTool::runBernstein() {
@@ -362,5 +378,32 @@ void CaseTool::runBernstein() {
 		ui.outputList->setCurrentItem(item);
 	}
 
+	// step 7
+	string step7Separator = "Step 7: add additional relation";
+	
+
+	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(finalAnswer, allFdAfterPartitioning);
+
+	AttributeSet smallestKey = getSmallestKey(candidateKeys);
+	
+	std::pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
+
+		
+	set<int> attrs = extraRelation.first.getAttributes();
+	string attrsStr;
+	for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
+		attrsStr += std::to_string(static_cast<long long>(*iter));
+	}
+	if (finalAnswer.count(extraRelation) == 0 && extraRelation.first.getAttributes() != smallestKey.getAttributes()) {
+		item = new QListWidgetItem(QString(step7Separator.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(step7Separator.c_str()));
+		ui.outputList->setCurrentItem(item);
+
+		item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(attrsStr.c_str()));
+
+		ui.outputList->setCurrentItem(item);
+	}
+	
 }
 

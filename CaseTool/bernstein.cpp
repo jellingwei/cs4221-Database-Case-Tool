@@ -1,6 +1,8 @@
 #include <cassert>
 #include <exception>
 #include <algorithm>
+#include <vector>
+#include <utility>
 
 #include "bernstein.h"
 
@@ -9,6 +11,7 @@
 namespace bernstein {
 	using std::exception;
 	using std::string;
+	using std::vector;
 
 	/*
 	 * For every FD X -> Y, produce FDs X -> a for every attribute a that is in Y.
@@ -393,6 +396,69 @@ namespace bernstein {
 		}
 
 		return resultingSet;
+	}
+
+
+	AttributeSet getAllAttributesInRelations(set<std::pair<AttributeSet, set<AttributeSet> > > relations) {
+		set<int> attrInRelations;
+
+		for (auto iter = relations.begin(); iter != relations.end(); ++iter) {
+			AttributeSet attributesSet = iter->first;
+			set<int> attrs = attributesSet.getAttributes();
+
+			attrInRelations.insert(attrs.begin(), attrs.end());
+		}
+
+		return attrInRelations;
+	}
+
+	set<AttributeSet> findCandidateKeys(set<std::pair<AttributeSet, set<AttributeSet> > > relations, set<FunctionalDependency> allFds) {
+		AttributeSet allAttrInRel = getAllAttributesInRelations(relations);
+		set<AttributeSet> candidateKeys;
+
+		// iterate over all relations and their keys
+		for (auto iter = relations.begin(); iter != relations.end(); ++iter) {
+			set<AttributeSet> keys = iter->second;
+			for (auto keyIter = keys.begin(); keyIter != keys.end(); ++keyIter) {
+				AttributeSet possibleCandidateKeyForAll = *keyIter;
+
+				AttributeSet closure = possibleCandidateKeyForAll.getAttributeClosure(allFds);
+				// if closure of a key can obtain all attributes, insert into results
+				if (closure.containsAttributes(allAttrInRel)) {
+					candidateKeys.insert(*keyIter);
+				}
+			}
+
+		}
+
+		return candidateKeys;
+	}
+
+
+	std::pair<AttributeSet, set<AttributeSet> >  constructMissingAttrRelation(set<std::pair<AttributeSet, set<AttributeSet> > > relations, int sizeOfAttrs, AttributeSet key) {
+		set<int> missingAttr;
+		for (int i = 0; i < sizeOfAttrs; i++) {
+			missingAttr.insert(i);
+		}
+
+		set<int> allAttrInRel = getAllAttributesInRelations(relations).getAttributes();
+
+		for (auto iter = allAttrInRel.begin(); iter != allAttrInRel.end(); ++iter) {
+			missingAttr.erase(*iter);
+		}
+		
+		// make a relation with the missing attrs and the key 
+		set<int> keyAndMissingAttributes = missingAttr;
+		set<int> keyAttrs = key.getAttributes();
+		keyAndMissingAttributes.insert(keyAttrs.begin(), keyAttrs.end());
+
+		// relation contains the missing attributes and the key
+		AttributeSet keyAndMissingAttributesSet = AttributeSet(keyAndMissingAttributes);
+		// only one key for the relation, which is the key
+		set<AttributeSet> keySet;
+		keySet.insert(key);
+
+		return std::make_pair<AttributeSet, set<AttributeSet> >(keyAndMissingAttributesSet, keySet);
 	}
 
 }
