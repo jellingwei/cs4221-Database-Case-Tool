@@ -10,7 +10,7 @@
 #include "functionaldependency.h"
 #include "bernstein.h"
 #include "AttributeSet.h"
-
+#include "normaltest.h"
 
 
 using std::vector;
@@ -201,6 +201,29 @@ void CaseTool::numOfAttributes() {
 	ui.scrollArea2->setLayout(lay2);
 }
 
+void CaseTool::runLTK() {
+	ui.outputLTK->clear();
+
+}
+
+void CaseTool::runNormalFormTester() {
+	ui.outputNF->clear();
+
+	set<FunctionalDependency> fdSet = functionalDependecies;
+	set<int> setOfAllAttrs;
+	for (int i = 0 ; i < numAttributes; i++) {
+		setOfAllAttrs.insert(i);
+	}
+
+	AttributeSet attrSet (setOfAllAttrs);
+
+	char ans = normalTest::rootProcess(fdSet, attrSet);
+	QListWidgetItem *item = new QListWidgetItem(QString(ans), ui.outputNF);
+	item->setData(Qt::UserRole, ans);
+
+	ui.outputNF->setCurrentItem(item);
+}
+
 void CaseTool::runBernstein() {
 
 	ui.outputList->clear();
@@ -258,7 +281,6 @@ void CaseTool::runBernstein() {
 			ui.outputList->setCurrentItem(item);
 		}
 	}
-
 
 	// step 4
 	string step4Separator = "Step 4:";

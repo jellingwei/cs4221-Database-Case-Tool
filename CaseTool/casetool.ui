@@ -27,16 +27,6 @@
      <string>Add Fd</string>
     </property>
    </widget>
-   <widget class="QListView" name="outputLTK">
-    <property name="geometry">
-     <rect>
-      <x>320</x>
-      <y>360</y>
-      <width>271</width>
-      <height>241</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -145,7 +135,7 @@
      <string>Run LTK's Algo</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="outputListNF">
+   <widget class="QListWidget" name="outputNF">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -220,6 +210,16 @@
      </property>
     </widget>
    </widget>
+   <widget class="QListWidget" name="outputLTK">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>360</y>
+      <width>271</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -254,7 +254,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>99</x>
-     <y>290</y>
+     <y>315</y>
     </hint>
     <hint type="destinationlabel">
      <x>144</x>
@@ -301,12 +301,28 @@
    <slot>numOfAttributes()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>169</x>
-     <y>156</y>
+     <x>149</x>
+     <y>154</y>
     </hint>
     <hint type="destinationlabel">
      <x>243</x>
      <y>139</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runNFTester</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CaseToolClass</receiver>
+   <slot>runNormalFormTester()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>132</x>
+     <y>335</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>204</x>
+     <y>292</y>
     </hint>
    </hints>
   </connection>
@@ -318,5 +334,6 @@
   <slot>runBernstein()</slot>
   <slot>showFD(FunctionalDependency)</slot>
   <slot>numOfAttributes()</slot>
+  <slot>runNormalFormTester()</slot>
  </slots>
 </ui>
