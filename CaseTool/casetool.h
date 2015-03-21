@@ -25,6 +25,7 @@ public slots:
 	void runLTK();
 	void runNormalFormTester();
 	void runBernstein();
+	string displayFD(FunctionalDependency fd);
 	
 private:
 	Ui::CaseToolClass ui;

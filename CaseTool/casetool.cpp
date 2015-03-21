@@ -39,8 +39,46 @@ int numAttributes;
 vector<QCheckBox*> lhsCheckBox;
 vector<QCheckBox*> rhsCheckBox;
 
-
 set<FunctionalDependency> functionalDependecies;
+
+
+string getTextOfCheckbox(int i) {
+	char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+	std::stringstream ss;
+	ss << i_char;
+	string stringToDisplay;
+	ss >> stringToDisplay;
+	return stringToDisplay;
+}
+
+
+string CaseTool::displayFD(FunctionalDependency fd) {
+
+	string lhsStr;
+	for (auto iter = lhs.begin(); iter != lhs.end(); ++iter) {
+		string str = getTextOfCheckbox(static_cast<int>(*iter));
+		lhsStr += str;
+	}
+
+	string rhsStr;
+	for (auto iter = rhs.begin(); iter != rhs.end(); ++iter) {
+		string str = getTextOfCheckbox(static_cast<int>(*iter));
+		rhsStr += str;
+	}
+
+	string fullStr = lhsStr + "->" + rhsStr;
+
+	return fullStr;
+}
+
+void CaseTool::showFD(FunctionalDependency fd) {
+	string ans = displayFD(fd);
+	QListWidgetItem *item = new QListWidgetItem(QString(ans.c_str()), ui.FDList);
+	
+	ui.FDList->setCurrentItem(item);
+
+
+}
 
 void CaseTool::addFD() {
 	FunctionalDependency fd(lhs, rhs);
@@ -66,12 +104,7 @@ void CaseTool::addFD() {
 	return;
 }
 
-void CaseTool::showFD(FunctionalDependency fd) {
-	QListWidgetItem *item = new QListWidgetItem(QString(fd.display().c_str()), ui.FDList);
-	
-	ui.FDList->setCurrentItem(item);
 
-}
 
 void CaseTool::addLhsToFd(bool isChecked){
 	QObject* obj = sender();
@@ -136,14 +169,7 @@ void clearLayout(QLayout *layout){
     }
 }
 
-string getTextOfCheckbox(int i) {
-	char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
-	std::stringstream ss;
-	ss << i_char;
-	string stringToDisplay;
-	ss >> stringToDisplay;
-	return stringToDisplay;
-}
+
 
 void CaseTool::numOfAttributes() {
 	numAttributes = ui.numOfAttributes->value();
@@ -231,7 +257,20 @@ void CaseTool::runNormalFormTester() {
 	AttributeSet attrSet (setOfAllAttrs);
 
 	char ans = normalTest::rootProcess(fdSet, attrSet);
-	QListWidgetItem *item = new QListWidgetItem(QString(ans), ui.outputNF);
+	string nf = "bug";
+	if (ans == '1') {
+		nf = "1NF";
+	} else if (ans == '2') {
+		nf = "2NF";
+	} else if (ans == '3') {
+		nf = "3NF";
+	} else if (ans == 'b') {
+		nf = "BCNF";
+	} else if (ans == 'e'){
+		nf = "EKNF";
+	}
+
+	QListWidgetItem *item = new QListWidgetItem(QString(nf.c_str()), ui.outputNF);
 	item->setData(Qt::UserRole, ans);
 
 	ui.outputNF->setCurrentItem(item);
