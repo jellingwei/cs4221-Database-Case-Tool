@@ -1,34 +1,34 @@
 #include "relation.h"
 
 Relation::Relation(AttributeSet attr, AttributeSet relKey) {
-	attributes = attr.getAttributes();
-	keys.insert(relKey.getAttributes());
+	_attributes = attr.getAttributes();
+	_keys.insert(relKey.getAttributes());
 }
 
 Relation::Relation(AttributeSet attr, set<AttributeSet> keys) {
-	attributes = attr.getAttributes();
+	_attributes = attr.getAttributes();
 	for (auto keysItr = keys.begin(); keysItr != keys.end(); ++keysItr) {
 		AttributeSet key = *keysItr;
-		keys.insert(key.getAttributes());
+		_keys.insert(key.getAttributes());
 	}
 }
 
 int Relation::getRelationSize() const {
-	return attributes.size();
+	return _attributes.size();
 }
 
 int Relation::getKeySize() const {
-	return keys.size();
+	return _keys.size();
 }
 
 AttributeSet Relation::getAttributes() {
-	AttributeSet returnValue(attributes);
+	AttributeSet returnValue(_attributes);
 	return returnValue;
 }
 
 set<AttributeSet> Relation::getKeys() {
 	set<AttributeSet> returnValue;
-	for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
+	for (auto itr = _keys.begin(); itr != _keys.end(); ++itr) {
 		AttributeSet key(*itr);
 		returnValue.insert(key);
 	}
@@ -37,5 +37,5 @@ set<AttributeSet> Relation::getKeys() {
 
 void Relation::insertKey(AttributeSet key) {
 	set<int> keySet = key.getAttributes();
-	keys.insert(keySet);
+	_keys.insert(keySet);
 }

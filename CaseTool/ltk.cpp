@@ -12,51 +12,21 @@ namespace ltk {
 	using std::unordered_map;
 	using std::make_pair;
 	using std::swap;
+	using std::pair;
 	
 	//Private attributes
 	unordered_map<AttributeSet, set<FunctionalDependency> > globalSynthesizedFDs;
 	set<FunctionalDependency> globalFDs;
 
 	//Private methods
+	set<Relation> runBernstein(set<FunctionalDependency> startFd, int numAttributes);
+	AttributeSet getSmallestKey(set<AttributeSet> candidateKeys);
 	set<Relation> augmentPreparatorySchema(set<Relation> constructedRelations, set<FunctionalDependency> minimalFDs, AttributeSet startAttributes);
 	set<FunctionalDependency> constructSynthesizedPrimeFDs(AttributeSet relAttr, AttributeSet excludeAttr);
 	set<FunctionalDependency> getGlobalFDs();
 
-	set<Relation> constructPreparatorySchema(AttributeSet startAttributes, set<FunctionalDependency> startFDs) {
-		set<FunctionalDependency> singletonFDs = bernstein::decomposeFd(startFDs);
-		set<FunctionalDependency> nonRedundantAttributesFDs = bernstein::removeRedundantAttributes(singletonFDs);
-		set<FunctionalDependency> minimalFDs = bernstein::eliminateTransitiveDependencies(nonRedundantAttributesFDs);
-		unordered_map<AttributeSet, set<FunctionalDependency>> partitionedFDs = bernstein::partitionFd(minimalFDs);
-		set<Relation> finalRelation;
-
-		for (auto mapItr = partitionedFDs.begin(); mapItr != partitionedFDs.end(); ++mapItr) {
-			AttributeSet attributes = mapItr->first;
-			set<FunctionalDependency> fdSet = mapItr->second;
-			
-			for (auto fdItr = fdSet.begin(); fdItr != fdSet.end(); ++fdItr) {
-				FunctionalDependency fd = *fdItr;
-				AttributeSet key = fd.getLhsAttrSet();
-				Relation relation(attributes, key);
-				finalRelation.insert(relation);
-			}
-		}
-		return finalRelation;
-		//Construct relations
-		//Augment preparatory schema(constructed relations, minimalFDs, startAttributes);
-	}
-
-	set<Relation> augmentPreparatorySchema(set<Relation> constructedRelations, set<FunctionalDependency> minimalFDs, AttributeSet startAttributes) {
-		//For each constructed relation, check if the closure of attributes can give back the whole initial set of attributes
-		for (auto itr = constructedRelations.begin(); itr != constructedRelations.end(); ++itr) {
-			Relation relation = *itr;
-			set<AttributeSet> keySet = relation.getKeys();
-			/*if (attributes.getAttributeClosure() != startAttributes) {
-				//TODO: Find minimal subset
-			}*/
-		}
-		//If cannot, construct a subset of the initial set of attributes such that its closure can give it back
-		//Add this relation to the preparatory schema to give the whole preparatory schema
-		throw exception();
+	set<Relation> constructPreparatorySchema(set<FunctionalDependency> startFDs, int numAttributes) {
+		return runBernstein(startFDs, numAttributes);
 	}
 
 	//Outputs the new set of synthesized key of relation if attribute is superfluous
@@ -82,6 +52,19 @@ namespace ltk {
 		
 		if (reducedSynthesizedKeys.size() == 0) {
 			isSuperfluous = false;
+			set<AttributeSet> empty;
+			return empty;
+		} else {
+			isSuperfluous = false;
+			for (auto keyItr = reducedSynthesizedKeys.begin(); keyItr != reducedSynthesizedKeys.end(); ++keyItr) {
+				AttributeSet key = *keyItr;
+				if (key.getAttributeClosure(reducedSynthesizedFDs).containsAttributes(singleAttribute)) {
+					isSuperfluous = true;
+				}
+			}
+		}
+
+		if (!isSuperfluous) {
 			set<AttributeSet> empty;
 			return empty;
 		}
@@ -117,10 +100,10 @@ namespace ltk {
 		}
 
 		if (isSuperfluous) {
+			return reducedSynthesizedKeys;
+		} else {
 			set<AttributeSet> empty;
 			return empty;
-		} else {
-			return reducedSynthesizedKeys;
 		}
 	}
 
@@ -153,6 +136,7 @@ namespace ltk {
 				FunctionalDependency fd(key, fdRHS);
 				FDs.insert(fd);
 			}
+			globalSynthesizedFDs[attributes] = FDs;  //For debugging purposes
 			newFDs[attributes] = FDs;
 		}
 		return newFDs;
@@ -189,7 +173,7 @@ namespace ltk {
 		return synPrimeFDs;
 	}
 
-	set<Relation> deletionNormalization(AttributeSet attributes, set<FunctionalDependency> FDs) {
+	/*set<Relation> deletionNormalization(AttributeSet attributes, set<FunctionalDependency> FDs) {
 		//Construct preparatory schema from above
 		set<Relation> preparatoryRelationsSet = constructPreparatorySchema(attributes, FDs);
 		vector<Relation> preparatoryRelations;
@@ -228,5 +212,52 @@ namespace ltk {
 			finalRelations.insert(preparatoryRelations[i]);
 		}
 		return finalRelations;
+	}*/
+
+	set<Relation> runBernstein(set<FunctionalDependency> startFd, int numAttributes) {
+		set<Relation> finalRelations;
+
+		//Run Bernstein algorithm
+		set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(startFd);
+		set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(startFd);
+		unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);
+		partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
+		set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);
+		partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);
+		set<pair<AttributeSet, set<AttributeSet> > > finalAnswer = bernstein::constructRelations(partitions);
+
+		for (auto relItr = finalAnswer.begin(); relItr != finalAnswer.end(); ++relItr) {
+			AttributeSet attributes = relItr->first;
+			set<AttributeSet> keys = relItr->second;
+			if (attributes.size() != 0 && keys.size() != 0) {
+				Relation relation(attributes, keys);
+				finalRelations.insert(relation);
+			}
+		}
+
+		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(finalAnswer, allFdAfterPartitioning);
+		AttributeSet smallestKey = getSmallestKey(candidateKeys);
+		pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
+
+		if (finalAnswer.count(extraRelation) == 0 && extraRelation.first.getAttributes() != smallestKey.getAttributes()) {
+			Relation relation(extraRelation.first, extraRelation.second);
+			finalRelations.insert(relation);
+		}
+		return finalRelations;
+	}
+
+	AttributeSet getSmallestKey(set<AttributeSet> candidateKeys) {
+		AttributeSet answer;
+		bool isSet = false;
+
+		for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
+			if (!isSet || iter->getAttributes().size() < answer.getAttributes().size()) {
+				answer = *iter;
+				isSet = true;
+			}
+		}
+
+		return answer;
+
 	}
 }

@@ -19,15 +19,15 @@ public:
 
 	bool operator<( const Relation& relation2 ) const 
 	{
-		return (attributes < relation2.attributes && keys < relation2.keys);
+		return (_attributes < relation2._attributes && _keys < relation2._keys);
 	}
 
 	bool operator==( const Relation& relation2 ) const 
 	{
-		return (attributes == relation2.attributes && keys == relation2.keys);
+		return (_attributes == relation2._attributes && _keys == relation2._keys);
 	}
 
 private:
-	set<int> attributes;
-	set<set<int>> keys;
+	set<int> _attributes;
+	set<set<int>> _keys;
 };
