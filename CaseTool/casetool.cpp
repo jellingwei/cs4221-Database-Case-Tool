@@ -11,7 +11,8 @@
 #include "bernstein.h"
 #include "AttributeSet.h"
 #include "normaltest.h"
-
+#include "ltk.h"
+#include "relation.h"
 
 using std::vector;
 using std::set;
@@ -242,7 +243,107 @@ void CaseTool::reset() {
 
 void CaseTool::runLTK() {
 	ui.outputLTK->clear();
+	set<FunctionalDependency> fdSet = functionalDependecies;
 
+	string step1Separator = "Step 1: Construct preparatory schema";
+	QListWidgetItem *item = new QListWidgetItem(QString(step1Separator.c_str()), ui.outputLTK);
+	item->setData(Qt::UserRole, QString(step1Separator.c_str()));
+	set<Relation> preparatoryRelations = ltk::constructPreparatorySchema(fdSet, numAttributes);
+
+	for (auto relItr = preparatoryRelations.begin(); relItr != preparatoryRelations.end(); ++relItr) {
+		Relation rel = *relItr;
+		string attrStr = rel.getAttributes().toString();
+		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
+		item->setData(Qt::UserRole, QString(attrStr.c_str()));
+		ui.outputLTK->setCurrentItem(item);
+	}
+
+	string step2Separator = "\nStep 2: Construct synthesized FDs";
+	item = new QListWidgetItem(QString(step2Separator.c_str()), ui.outputLTK);
+	item->setData(Qt::UserRole, QString(step2Separator.c_str()));
+	unordered_map<AttributeSet, set<FunctionalDependency> > synFD = ltk::createSynthesizedFDs(preparatoryRelations);
+
+	for (auto synFdItr = synFD.begin(); synFdItr != synFD.end(); ++ synFdItr) {
+		set<FunctionalDependency> fdSet = synFdItr->second;
+		for (auto fdItr = fdSet.begin(); fdItr != fdSet.end(); ++fdItr) {
+			FunctionalDependency fd = *fdItr;
+			string fdStr = fd.display();
+			item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputLTK);
+			item->setData(Qt::UserRole, QString(fdStr.c_str()));
+			ui.outputLTK->setCurrentItem(item);
+		}
+	}
+
+	string step3Separator = "\nStep 3: Detect superfluous attributes in each relation";
+	item = new QListWidgetItem(QString(step3Separator.c_str()), ui.outputLTK);
+	item->setData(Qt::UserRole, QString(step3Separator.c_str()));
+
+	vector<Relation> prepRelations(preparatoryRelations.begin(), preparatoryRelations.end());
+	for (unsigned int i = 0; i < prepRelations.size(); i++) {
+		Relation rel = prepRelations[i];
+		AttributeSet attributes = rel.getAttributes();
+		set<int> attrSet = attributes.getAttributes();
+		vector<int> attrVec(attrSet.begin(), attrSet.end());
+
+		for (unsigned int j = 0; j < attrVec.size(); j++) {
+			string step3;
+			step3 += "Check if ";
+			step3 += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
+			step3 += " is superfluous in " + attributes.toString();
+			item = new QListWidgetItem(QString(step3.c_str()), ui.outputLTK);
+			item->setData(Qt::UserRole, QString(step3.c_str()));
+
+			set<int> singleAttrSet;
+			singleAttrSet.insert(attrVec[j]);
+			AttributeSet singleAttr(singleAttrSet);
+			set<AttributeSet> returnedKeys = ltk::superfluousAttributeDetection(rel, singleAttr);
+
+			if (returnedKeys.size() == 0) {
+				string notSuperfluous;
+				notSuperfluous += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
+				notSuperfluous += " is not superfluous";
+				item = new QListWidgetItem(QString(notSuperfluous.c_str()), ui.outputLTK);
+				item->setData(Qt::UserRole, QString(notSuperfluous.c_str()));
+			} else {
+				string superfluous;
+				superfluous += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
+				superfluous += " is superfluous";
+				item = new QListWidgetItem(QString(superfluous.c_str()), ui.outputLTK);
+				item->setData(Qt::UserRole, QString(superfluous.c_str()));
+
+				AttributeSet finalAttributes = attributes - singleAttr;
+				attributes = attributes - singleAttr;
+				Relation newRelation(finalAttributes, returnedKeys);
+				std::swap(newRelation, prepRelations[i]);
+				//i--;  //Rerun the algorithm again
+				//break;
+			}
+		}
+	}
+
+	string step4Separator = "\nFinal Relations:";
+	item = new QListWidgetItem(QString(step4Separator.c_str()), ui.outputLTK);
+	item->setData(Qt::UserRole, QString(step4Separator.c_str()));
+
+	for (unsigned int i = 0; i < prepRelations.size(); i++) {
+		Relation rel = prepRelations[i];
+		AttributeSet attributes = rel.getAttributes();
+		set<AttributeSet> keys = rel.getKeys();
+		string attrStr = "R" + std::to_string(static_cast<long long>(i+1)) + ": " + attributes.toString();
+		string keyStr;
+
+		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
+		item->setData(Qt::UserRole, QString(attrStr.c_str()));
+		keyStr = "Key(s): ";
+
+		for (auto keyItr = keys.begin(); keyItr != keys.end(); ++keyItr) {
+			AttributeSet key = *keyItr;
+			keyStr += key.toString() + ", ";
+		}
+		keyStr.resize(keyStr.size() - 2);
+		item = new QListWidgetItem(QString(keyStr.c_str()), ui.outputLTK);
+		item->setData(Qt::UserRole, QString(keyStr.c_str()));
+	}
 }
 
 void CaseTool::runNormalFormTester() {
