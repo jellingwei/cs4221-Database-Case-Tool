@@ -95,8 +95,10 @@ namespace bernstein {
 	 * @sa eliminateTransitiveDependencies
 	 */
 	set<FunctionalDependency> obtainMinimalCover(set<FunctionalDependency> fdSet) {
+		fdSet = decomposeFd(fdSet);
 		fdSet = removeRedundantAttributes(fdSet);
 		fdSet = eliminateTransitiveDependencies(fdSet);
+
 		return fdSet; 
 	}
 
@@ -182,7 +184,7 @@ namespace bernstein {
 				set<FunctionalDependency> fdSet2 = iter2->second;
 				AttributeSet closure2 = attrSet2.getAttributeClosure(allFds);
 
-				// if attrSet and atrSet2 are equivalent
+				// if attrSet and attrSet2 are equivalent
 				if (closure.containsAttributes(attrSet2.getAttributes()) && 
 					   closure2.containsAttributes(attrSet.getAttributes())) {
 

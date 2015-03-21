@@ -410,6 +410,14 @@ void CaseTool::runBernstein() {
 		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
 			attrsStr += std::to_string(static_cast<long long>(*iter));
 		}
+		attrsStr += "  keys are: ";
+		for (auto iter = keys.begin(); iter != keys.end(); ++iter) {
+			set<int> keysAttr = iter->getAttributes();
+			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
+				attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
+			}
+			attrsStr += ", ";
+		}
 
 		QListWidgetItem *item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(attrsStr.c_str()));
