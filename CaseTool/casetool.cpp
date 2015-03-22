@@ -385,6 +385,7 @@ AttributeSet getSmallestKey(set<AttributeSet> candidateKeys) {
 		if (!isSet || iter->getAttributes().size() < answer.getAttributes().size()) {
 			answer = *iter;
 			isSet = true;
+			qDebug() << " setting answer to size "  << answer.getAttributes().size();
 		}
 	}
 
@@ -536,15 +537,27 @@ void CaseTool::runBernstein() {
 
 	// step 7
 	string step7Separator = "Step 7: add additional relation";
-	
+	string attrsStr;
+
 	qDebug() << "=============================";
 	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(), allFdAfterPartitioning);
+
+	for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
+		set<int> keysAttr = iter->getAttributes();
+		for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
+			attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
+		}
+		attrsStr += ", ";
+	}
+	qDebug() << "candidate keys are " << QString(attrsStr.c_str());
+
 	AttributeSet smallestKey = getSmallestKey(candidateKeys);
+	set<int> attrs = smallestKey.getAttributes();
 	
 	std::pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
 		
-	set<int> attrs = extraRelation.first.getAttributes();
-	string attrsStr;
+	attrs = extraRelation.first.getAttributes();
+	attrsStr = "";
 	for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
 		attrsStr += std::to_string(static_cast<long long>(*iter));
 	}
