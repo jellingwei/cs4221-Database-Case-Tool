@@ -8,6 +8,10 @@
 namespace bernstein {
 	using std::unordered_map;
 	using std::set;
+	using std::vector;
+
+	vector<std::pair<int, FunctionalDependency> > getMessageForStep1();
+	vector<FunctionalDependency > getMessageForRemovingTransitiveDependencies();
 
 	set<FunctionalDependency> decomposeFd(set<FunctionalDependency> );
 

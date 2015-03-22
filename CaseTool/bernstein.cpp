@@ -15,6 +15,17 @@ namespace bernstein {
 	using std::pair;
 	using std::multimap;
 
+	vector<string> message;
+	vector<std::pair<int, FunctionalDependency> > step1Output;
+	vector<FunctionalDependency > step2Output;
+
+	vector<std::pair<int, FunctionalDependency> > getMessageForStep1() {
+		return step1Output;
+	}
+	vector<FunctionalDependency > getMessageForRemovingTransitiveDependencies() {
+		return step2Output;
+	}
+
 	/*
 	 * For every FD X -> Y, produce FDs X -> a for every attribute a that is in Y.
 	 */
@@ -56,8 +67,11 @@ namespace bernstein {
 	 * Detects redundant attributes in functional dependencies and removes them
 	 */
 	set<FunctionalDependency> bernstein::removeRedundantAttributes(set<FunctionalDependency> fdSet) {
+		step1Output.clear();
+
 		// first remove the trivial FDs
 		fdSet = removeTrivialDependencies(fdSet);
+		fdSet = decomposeFd(fdSet);
 		set<FunctionalDependency> resultingFdSet = fdSet;
 
 		for (auto iter = fdSet.begin(); iter != fdSet.end(); ++iter) {
@@ -79,6 +93,7 @@ namespace bernstein {
 				bool isRedundant = closure.containsAttributes(attributeAsSet);
 
 				if (isRedundant) {
+					step1Output.push_back(pair<int, FunctionalDependency>(attribute, fd));
 					lhs = dropAttributeFromAttributeSet(lhs, attribute);
 				}
 			}
@@ -282,6 +297,7 @@ namespace bernstein {
 	 * Removes redundant dependencies
 	 */
 	set<FunctionalDependency> eliminateTransitiveDependencies(set<FunctionalDependency> startingFdSet) {
+		step2Output.clear();
 		set<FunctionalDependency> currentFdSet = startingFdSet;
 		for (auto fdIter = startingFdSet.begin(); fdIter != startingFdSet.end(); ++fdIter) {
 			FunctionalDependency currentFd = *fdIter;
@@ -296,6 +312,7 @@ namespace bernstein {
 			bool isRedundant = attrClosure.containsAttributes(currentFd.getRhs());
 
 			if (isRedundant) {
+				step2Output.push_back(currentFd);
 				currentFdSet = possibleFdSet;
 			}
 		}

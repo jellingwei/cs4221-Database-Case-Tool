@@ -441,6 +441,15 @@ void CaseTool::runBernstein() {
 	ui.outputList->setCurrentItem(item);
 	set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(fdSet);
 
+	vector<std::pair<int, FunctionalDependency> > messageForStep1 = bernstein::getMessageForStep1();
+	for (auto iter = messageForStep1.begin(); iter != messageForStep1.end(); ++iter) {
+		int redundantAttribute = iter->first;
+		FunctionalDependency fd = iter->second;
+
+		string step1Explanation = "The attribute " + getTextOfCheckbox(redundantAttribute) + " is redundant in the FD " + displayFD(fd);
+		item = new QListWidgetItem(QString(step1Explanation.c_str()), ui.outputList);
+	}
+
 	for (auto iter = newFdSet.begin(); iter != newFdSet.end(); ++iter) {
 		FunctionalDependency fd = *iter;
 		
@@ -459,6 +468,13 @@ void CaseTool::runBernstein() {
 
 	ui.outputList->setCurrentItem(stepWidget2);
 	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(fdSet);
+
+	vector<FunctionalDependency> messageForStep2 = bernstein::getMessageForRemovingTransitiveDependencies();
+	for (auto iter = messageForStep2.begin(); iter != messageForStep2.end(); ++iter) {
+		string step2Explanation = "The FD " + displayFD(*iter) + " is redundant.";
+		item = new QListWidgetItem(QString(step2Explanation.c_str()), ui.outputList);
+	}
+
 	for (auto iter = minimalCover.begin(); iter != minimalCover.end(); ++iter) {
 		FunctionalDependency fd = *iter;
 		string fdStr = displayFD(fd);
@@ -496,8 +512,22 @@ void CaseTool::runBernstein() {
 
 	partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
 	item = new QListWidgetItem(QString("--------"), ui.outputList);
+
+	int partitionNum = 0;
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
+		if (fdSet.size() == 0) {
+			continue;
+		}
+
+		AttributeSet lhs = iter->first;
+		if (lhs.size() != 0 ) {
+			string partitionSeperator = string("Partition ") + std::to_string(static_cast<long long>(++partitionNum));
+			item = new QListWidgetItem(partitionSeperator.c_str(), ui.outputList);
+		} else {
+			string partitionSeperator = string("Partition J");
+			item = new QListWidgetItem(partitionSeperator.c_str(), ui.outputList);
+		}
 
 		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
 			FunctionalDependency fd = *fdIter;
@@ -521,6 +551,13 @@ void CaseTool::runBernstein() {
 
 	set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);
 	partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);
+
+	vector<FunctionalDependency> messageForStep5 = bernstein::getMessageForRemovingTransitiveDependencies();
+	for (auto iter = messageForStep5.begin(); iter != messageForStep5.end(); ++iter) {
+		string step5Explanation = "The FD " + displayFD(*iter) + " is redundant.";
+		item = new QListWidgetItem(QString(step5Explanation.c_str()), ui.outputList);
+	}
+
 	item = new QListWidgetItem(QString("--------"), ui.outputList);
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
@@ -553,11 +590,7 @@ void CaseTool::runBernstein() {
 		attrsStr = displayAttributeSet(attrsInRelation) + '\n';
 		attrsStr += "Key(s) : ";
 		for (auto iter = keys.begin(); iter != keys.end(); ++iter) {
-			set<int> keysAttr = iter->getAttributes();
-			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
-				attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
-			}
-			attrsStr += ", ";
+			attrsStr += displayAttributeSet(*iter) + ", ";
 		}
 		attrsStr.resize(attrsStr.size() - 2);
 
