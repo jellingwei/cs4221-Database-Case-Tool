@@ -55,21 +55,34 @@ string getTextOfCheckbox(int i) {
 
 string CaseTool::displayFD(FunctionalDependency fd) {
 
-	string lhsStr;
+	string lhsStr ="";
+	set<int> lhs = fd.getLhs();
 	for (auto iter = lhs.begin(); iter != lhs.end(); ++iter) {
-		string str = getTextOfCheckbox(static_cast<int>(*iter));
+		string str = getTextOfCheckbox(static_cast<long long>(*iter));
 		lhsStr += str;
 	}
 
-	string rhsStr;
+	string rhsStr ="";
+	set<int> rhs = fd.getRhs();
 	for (auto iter = rhs.begin(); iter != rhs.end(); ++iter) {
-		string str = getTextOfCheckbox(static_cast<int>(*iter));
+		string str = getTextOfCheckbox(static_cast<long long>(*iter));
 		rhsStr += str;
 	}
 
 	string fullStr = lhsStr + "->" + rhsStr;
 
 	return fullStr;
+}
+
+string displayAttributeSet(AttributeSet attrSet) {
+	set<int> attr = attrSet.getAttributes();
+	string finalStr;
+	for (auto iter = attr.begin(); iter != attr.end(); ++iter) {
+		string str = getTextOfCheckbox(static_cast<long long>(*iter));
+		finalStr += str;
+	}
+
+	return finalStr;
 }
 
 void CaseTool::showFD(FunctionalDependency fd) {
@@ -385,7 +398,6 @@ AttributeSet getSmallestKey(set<AttributeSet> candidateKeys) {
 		if (!isSet || iter->getAttributes().size() < answer.getAttributes().size()) {
 			answer = *iter;
 			isSet = true;
-			qDebug() << " setting answer to size "  << answer.getAttributes().size();
 		}
 	}
 
@@ -422,7 +434,7 @@ void CaseTool::runBernstein() {
 	set<FunctionalDependency> fdSet = functionalDependecies;
 
 	// step 1
-	string step1Separator = "Step 1:";
+	string step1Separator = "Step 1: Remove redundant attributes";
 	QListWidgetItem *item = new QListWidgetItem(QString(step1Separator.c_str()), ui.outputList);
 	item->setData(Qt::UserRole, QString(step1Separator.c_str()));
 
@@ -431,7 +443,9 @@ void CaseTool::runBernstein() {
 
 	for (auto iter = newFdSet.begin(); iter != newFdSet.end(); ++iter) {
 		FunctionalDependency fd = *iter;
-		string fdStr = fd.display();
+		
+		string fdStr = displayFD(fd);
+		
 		QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(fdStr.c_str()));
 
@@ -439,7 +453,7 @@ void CaseTool::runBernstein() {
 	}
 	
 	// step 2...
-	string step2Separator = "\nStep 2:";
+	string step2Separator = "\nStep 2: Find covering";
 	QListWidgetItem *stepWidget2 = new QListWidgetItem(QString(step2Separator.c_str()), ui.outputList);
 	//item->setData(Qt::UserRole, QString(step2Separator.c_str()));
 
@@ -447,7 +461,7 @@ void CaseTool::runBernstein() {
 	set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(fdSet);
 	for (auto iter = minimalCover.begin(); iter != minimalCover.end(); ++iter) {
 		FunctionalDependency fd = *iter;
-		string fdStr = fd.display();
+		string fdStr = displayFD(fd);
 		QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(fdStr.c_str()));
 
@@ -455,36 +469,39 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 3
-	string step3Separator = "\nStep 3:";
+	string step3Separator = "\nStep 3: Partition";
 	QListWidgetItem *stepWidget3 = new QListWidgetItem(QString(step3Separator.c_str()), ui.outputList);
 	ui.outputList->setCurrentItem(stepWidget3);
 
+	item = new QListWidgetItem(QString("--------"), ui.outputList);
 	unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
 
 		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
 			FunctionalDependency fd = *fdIter;
-			string fdStr = fd.display();
+			string fdStr = displayFD(fd);
 			QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
 			item->setData(Qt::UserRole, QString(fdStr.c_str()));
 
 			ui.outputList->setCurrentItem(item);
 		}
+		QListWidgetItem *item = new QListWidgetItem(QString("--------"), ui.outputList);
 	}
 
 	// step 4
-	string step4Separator = "\nStep 4:";
+	string step4Separator = "\nStep 4: Merge groups";
 	QListWidgetItem *stepWidget4 = new QListWidgetItem(QString(step4Separator.c_str()), ui.outputList);
 	ui.outputList->setCurrentItem(stepWidget4);
 
 	partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
+	item = new QListWidgetItem(QString("--------"), ui.outputList);
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
 
 		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
 			FunctionalDependency fd = *fdIter;
-			string fdStr = fd.display();
+			string fdStr = displayFD(fd);
 			QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
 			item->setData(Qt::UserRole, QString(fdStr.c_str()));
 
@@ -496,7 +513,7 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 5
-	string step5Separator = "\nStep 5:";
+	string step5Separator = "\nStep 5: Remove transitive dependencies";
 	QListWidgetItem *stepWidget5 = new QListWidgetItem(QString(step5Separator.c_str()), ui.outputList);
 	ui.outputList->setCurrentItem(stepWidget5);
 
@@ -504,21 +521,23 @@ void CaseTool::runBernstein() {
 
 	set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);
 	partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);
+	item = new QListWidgetItem(QString("--------"), ui.outputList);
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
 
 		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
 			FunctionalDependency fd = *fdIter;
-			string fdStr = fd.display();
+			string fdStr = displayFD(fd);
 			QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
 			item->setData(Qt::UserRole, QString(fdStr.c_str()));
 
 			ui.outputList->setCurrentItem(item);
 		}
+		QListWidgetItem *item = new QListWidgetItem(QString("--------"), ui.outputList);
 	}
 
 	// step 6
-	string step6Separator = "\nStep 6:";
+	string step6Separator = "\nStep 6: Construct Relations";
 	item = new QListWidgetItem(QString(step6Separator.c_str()), ui.outputList);
 	item->setData(Qt::UserRole, QString(step6Separator.c_str()));
 
@@ -529,12 +548,10 @@ void CaseTool::runBernstein() {
 		AttributeSet attrsInRelation = iter->first;
 		set<AttributeSet> keys = iter->second;
 		
-		set<int> attrs = attrsInRelation.getAttributes();
+		
 		string attrsStr;
-		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
-			attrsStr += std::to_string(static_cast<long long>(*iter));
-		}
-		attrsStr += "  keys are: ";
+		attrsStr = displayAttributeSet(attrsInRelation) + '\n';
+		attrsStr += "Key(s) : ";
 		for (auto iter = keys.begin(); iter != keys.end(); ++iter) {
 			set<int> keysAttr = iter->getAttributes();
 			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
@@ -542,6 +559,7 @@ void CaseTool::runBernstein() {
 			}
 			attrsStr += ", ";
 		}
+		attrsStr.resize(attrsStr.size() - 2);
 
 		QListWidgetItem *item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(attrsStr.c_str()));
@@ -549,7 +567,7 @@ void CaseTool::runBernstein() {
 		ui.outputList->setCurrentItem(item);
 	}
 
-	string step8Separator = "\nFinal set of relation, finding all candidate keys";
+	string step8Separator = "\nFinal set of relation, with all candidate keys listed";
 	item = new QListWidgetItem(QString(step8Separator.c_str()), ui.outputList);		
 	ui.outputList->setCurrentItem(item);
 
@@ -585,7 +603,7 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 7
-	string step7Separator = "\nStep 7: add additional relation for reconstructability";
+	string step7Separator = "\nAdd additional relation for reconstructability";
 	string attrsStr;
 
 	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(), allFdAfterPartitioning);
@@ -597,10 +615,8 @@ void CaseTool::runBernstein() {
 	std::pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
 		
 	attrs = extraRelation.first.getAttributes();
-	attrsStr = "";
-	for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
-		attrsStr += std::to_string(static_cast<long long>(*iter));
-	}
+	attrsStr = displayAttributeSet(attrs);
+
 	// check if the extra relation is a key to some relation
 	if (keysForRelation.count(extraRelation.first) == 0) {
 		item = new QListWidgetItem(QString(step7Separator.c_str()), ui.outputList);
