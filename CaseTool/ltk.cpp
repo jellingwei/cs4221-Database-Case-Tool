@@ -214,6 +214,14 @@ namespace ltk {
 		return finalRelations;
 	}*/
 
+	AttributeSet fullAttributeSet(int numAttributes) {
+		set<int> fullAttr;
+		for (int i = 0; i < numAttributes; i++) {
+			fullAttr.insert(i);
+		}
+		return fullAttr;
+	}
+
 	set<Relation> runBernstein(set<FunctionalDependency> startFd, int numAttributes) {
 		set<Relation> finalRelations;
 
@@ -235,7 +243,7 @@ namespace ltk {
 			}
 		}
 
-		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(finalAnswer, allFdAfterPartitioning);
+		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(numAttributes), allFdAfterPartitioning);
 		AttributeSet smallestKey = getSmallestKey(candidateKeys);
 		pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
 
