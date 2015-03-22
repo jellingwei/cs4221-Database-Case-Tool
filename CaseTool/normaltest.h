@@ -9,9 +9,11 @@ namespace normalTest {
 	using std::set;
 	using std::string;
 
+
+
 	
 	//maybe a set of non primes
-
+	set<AttributeSet> getCandidateKeys();
 
 	int findCandidateKeys(set<FunctionalDependency>, AttributeSet);
 	char rootProcess(set<FunctionalDependency>, AttributeSet);

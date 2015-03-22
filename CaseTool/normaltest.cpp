@@ -17,6 +17,21 @@ namespace normalTest {
 	set<int> prime;
 	int sizeOfCandi;
 
+	void resetState() {
+		superKeys.clear();
+		powerSet.clear();
+		candidateKeys.clear();
+		nonPrime.clear();
+		prime.clear();
+		sizeOfCandi = 0;
+
+	}
+
+	set<AttributeSet> getCandidateKeys() {
+		resetState();
+		return candidateKeys;
+	}
+
 	int findFactorial(int num){
 		int result = num;
 		for(int i=1; i<num; i++){

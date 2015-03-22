@@ -367,6 +367,7 @@ namespace bernstein {
 				
 				allAttr = AttributeSet(attributesInAllAttr);		
 			}
+
 			
 			finalAnswer.insert(std::make_pair<AttributeSet, set<AttributeSet> >(allAttr, allKeys));
 		}
@@ -414,24 +415,15 @@ namespace bernstein {
 		return attrInRelations;
 	}
 
-	set<AttributeSet> findCandidateKeys(set<std::pair<AttributeSet, set<AttributeSet> > > relations, set<FunctionalDependency> allFds) {
-		AttributeSet allAttrInRel = getAllAttributesInRelations(relations);
-		set<AttributeSet> candidateKeys;
+	set<AttributeSet> findCandidateKeys(AttributeSet attributes, set<FunctionalDependency> allFds) {
+		normalTest::findCandidateKeys(allFds, attributes);
+		set<AttributeSet> candidateKeys = normalTest::getCandidateKeys();
 
-		// iterate over all relations and their keys
-		for (auto iter = relations.begin(); iter != relations.end(); ++iter) {
-			set<AttributeSet> keys = iter->second;
-			for (auto keyIter = keys.begin(); keyIter != keys.end(); ++keyIter) {
-				AttributeSet possibleCandidateKeyForAll = *keyIter;
+		string attrsStr;
+		
 
-				AttributeSet closure = possibleCandidateKeyForAll.getAttributeClosure(allFds);
-				// if closure of a key can obtain all attributes, insert into results
-				if (closure.containsAttributes(allAttrInRel)) {
-					candidateKeys.insert(*keyIter);
-				}
-			}
-
-		}
+		qDebug() << QString(attrsStr.c_str());
+		
 
 		return candidateKeys;
 	}

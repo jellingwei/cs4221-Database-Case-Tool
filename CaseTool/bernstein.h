@@ -3,6 +3,7 @@
 
 #include "attributeset.h"
 #include "functionaldependency.h"
+#include "normaltest.h"
 
 namespace bernstein {
 	using std::unordered_map;
@@ -23,6 +24,6 @@ namespace bernstein {
 	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependenciesForPartition(unordered_map<AttributeSet, set<FunctionalDependency> > , set<FunctionalDependency> ); // for step 5
 	set<std::pair<AttributeSet, set<AttributeSet> > > constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> >);
 
-	set<AttributeSet> findCandidateKeys(set<std::pair<AttributeSet, set<AttributeSet> > >, set<FunctionalDependency> ); 
+	set<AttributeSet> findCandidateKeys(AttributeSet, set<FunctionalDependency> ); 
 	std::pair<AttributeSet, set<AttributeSet> >  constructMissingAttrRelation(set<std::pair<AttributeSet, set<AttributeSet> > >, int sizeOfAttrs, AttributeSet key);
 }

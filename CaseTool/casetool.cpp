@@ -392,6 +392,14 @@ AttributeSet getSmallestKey(set<AttributeSet> candidateKeys) {
 
 }
 
+AttributeSet fullAttributeSet() {
+	set<int> fullAttr;
+	for (int i = 0; i < numAttributes; i++) {
+		fullAttr.insert(i);
+	}
+	return fullAttr;
+}
+
 void CaseTool::runBernstein() {
 
 	ui.outputList->clear();
@@ -529,20 +537,18 @@ void CaseTool::runBernstein() {
 	// step 7
 	string step7Separator = "Step 7: add additional relation";
 	
-
-	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(finalAnswer, allFdAfterPartitioning);
-
+	qDebug() << "=============================";
+	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(), allFdAfterPartitioning);
 	AttributeSet smallestKey = getSmallestKey(candidateKeys);
 	
 	std::pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
-
 		
 	set<int> attrs = extraRelation.first.getAttributes();
 	string attrsStr;
 	for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
 		attrsStr += std::to_string(static_cast<long long>(*iter));
 	}
-	if (finalAnswer.count(extraRelation) == 0 && extraRelation.first.getAttributes() != smallestKey.getAttributes()) {
+	if (finalAnswer.count(extraRelation) == 0) {
 		item = new QListWidgetItem(QString(step7Separator.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(step7Separator.c_str()));
 		ui.outputList->setCurrentItem(item);
@@ -551,6 +557,29 @@ void CaseTool::runBernstein() {
 		item->setData(Qt::UserRole, QString(attrsStr.c_str()));
 
 		ui.outputList->setCurrentItem(item);
+	}
+
+
+	// step 8 : find all keys for every relation
+	for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
+		// extension: find all keys of the relation
+		AttributeSet attrSet;
+		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attrSet, allFdAfterPartitioning);
+
+		set<int> attrs = iter->first.getAttributes();
+		string attrsStr;
+		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
+			attrsStr += std::to_string(static_cast<long long>(*iter));
+		}
+		attrsStr += "  keys are: ";
+		for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
+			set<int> keysAttr = iter->getAttributes();
+			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
+				attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
+			}
+			attrsStr += ", ";
+		}
+
 	}
 	
 }
