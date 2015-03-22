@@ -12,6 +12,8 @@ namespace bernstein {
 	using std::exception;
 	using std::string;
 	using std::vector;
+	using std::pair;
+	using std::multimap;
 
 	/*
 	 * For every FD X -> Y, produce FDs X -> a for every attribute a that is in Y.
@@ -152,6 +154,28 @@ namespace bernstein {
 		return newFdSet;
 	}
 
+	// comparator for sorting by size of LHS attributeSet
+	bool sortByLhsSize (pair<AttributeSet, set<FunctionalDependency> >& pair1, pair<AttributeSet, set<FunctionalDependency> >& pair2) { 
+		return pair1.first.size() < pair2.first.size(); 
+	}
+
+
+	vector<pair<AttributeSet, set<FunctionalDependency> > > sortPartitionBySizeOfLHS( unordered_map<AttributeSet, set<FunctionalDependency> > partitions ) {
+		vector<pair<AttributeSet, set<FunctionalDependency> > > sortedList;
+
+		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+			AttributeSet attrSet = iter->first;
+			set<FunctionalDependency> fdSet = iter->second;
+
+			sortedList.push_back(std::make_pair<AttributeSet, set<FunctionalDependency> >(attrSet, fdSet));
+		}
+
+		std::sort(sortedList.begin(), sortedList.end(), sortByLhsSize);
+
+		return sortedList;
+
+	}
+
 	/**
 	 * Detects equivalent keys in a partition by computing closures. 
 	 * X and A are equivalent if X* contains A and A* contains X.
@@ -166,7 +190,11 @@ namespace bernstein {
 		set<int> emptySet;
 		AttributeSet emptyAttrSet(emptySet); // going to use this as J
 
-		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
+		vector<pair<AttributeSet, set<FunctionalDependency> > > sortedPartitions = sortPartitionBySizeOfLHS(partitions);
+		
+		multimap<AttributeSet, AttributeSet> mapOfMergedLhsToMergedRhs;
+
+		for (auto iter = sortedPartitions.begin(); iter != sortedPartitions.end(); ++iter) {
 			AttributeSet attrSet = iter->first;
 			set<FunctionalDependency> fdSet = iter->second;
 			if (isAdded.count(attrSet) != 0 && isAdded[attrSet]) {
@@ -176,7 +204,7 @@ namespace bernstein {
 
 			AttributeSet closure = attrSet.getAttributeClosure(allFds);
 
-			for (auto iter2 = iter; iter2 != partitions.end(); ++ iter2) {
+			for (auto iter2 = iter; iter2 != sortedPartitions.end(); ++ iter2) {
 				if (iter == iter2) {  // @todo I don't know how to initialise iter2 to be iter + 1
 					continue; 
 				}
@@ -184,9 +212,28 @@ namespace bernstein {
 				set<FunctionalDependency> fdSet2 = iter2->second;
 				AttributeSet closure2 = attrSet2.getAttributeClosure(allFds);
 
+				
 				// if attrSet and attrSet2 are equivalent
-				if (closure.containsAttributes(attrSet2.getAttributes()) && 
-					   closure2.containsAttributes(attrSet.getAttributes())) {
+				bool isEquivalent = (closure.containsAttributes(attrSet2.getAttributes()) && 
+									 closure2.containsAttributes(attrSet.getAttributes()));
+
+
+				bool isRhsBijectionWithSubsetOfAttrSetA = false;
+				std::pair <multimap<AttributeSet,AttributeSet>::iterator, multimap<AttributeSet,AttributeSet>::iterator> rhs 
+					= mapOfMergedLhsToMergedRhs.equal_range(attrSet);
+				
+				for (auto mapIter = rhs.first; mapIter != rhs.second; ++mapIter) {
+					AttributeSet possibleSubset = mapIter->second;
+					if (attrSet.containsAttributes(possibleSubset)) {
+						isRhsBijectionWithSubsetOfAttrSetA = true;
+					}
+				}
+
+				// if properly equivalent 
+				if (isEquivalent && !isRhsBijectionWithSubsetOfAttrSetA) {
+
+					mapOfMergedLhsToMergedRhs.insert(pair<AttributeSet, AttributeSet>(attrSet, attrSet2));
+					mapOfMergedLhsToMergedRhs.insert(pair<AttributeSet, AttributeSet>(attrSet2, attrSet));
 
 					isAdded[attrSet2] = true;
 					FunctionalDependency fd1(attrSet, attrSet2);
@@ -368,8 +415,9 @@ namespace bernstein {
 				allAttr = AttributeSet(attributesInAllAttr);		
 			}
 
-			
-			finalAnswer.insert(std::make_pair<AttributeSet, set<AttributeSet> >(allAttr, allKeys));
+			if (allAttr.size() > 0) {
+				finalAnswer.insert(std::make_pair<AttributeSet, set<AttributeSet> >(allAttr, allKeys));
+			}
 		}
 
 		return finalAnswer;
