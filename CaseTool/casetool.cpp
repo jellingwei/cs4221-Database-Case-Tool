@@ -280,7 +280,7 @@ void CaseTool::runLTK() {
 		set<FunctionalDependency> fdSet = synFdItr->second;
 		for (auto fdItr = fdSet.begin(); fdItr != fdSet.end(); ++fdItr) {
 			FunctionalDependency fd = *fdItr;
-			string fdStr = fd.display();
+			string fdStr = displayFD(fd);
 			item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputLTK);
 			item->setData(Qt::UserRole, QString(fdStr.c_str()));
 			ui.outputLTK->setCurrentItem(item);
