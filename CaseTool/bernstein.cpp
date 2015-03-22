@@ -416,13 +416,17 @@ namespace bernstein {
 	}
 
 	set<AttributeSet> findCandidateKeys(AttributeSet attributes, set<FunctionalDependency> allFds) {
-		normalTest::findCandidateKeys(allFds, attributes);
+		normalTest::resetState();
+		
+		qDebug() << QString(attributes.toString().c_str());
+
+		int status = normalTest::findCandidateKeys(allFds, attributes);
 		set<AttributeSet> candidateKeys = normalTest::getCandidateKeys();
 
 		string attrsStr;
 		
-
-		qDebug() << QString(attrsStr.c_str());
+		qDebug() <<"num of keys found?";
+		qDebug() << QString((std::to_string(static_cast<long long>(status)).c_str()));
 		
 
 		return candidateKeys;

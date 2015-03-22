@@ -13,6 +13,7 @@ namespace normalTest {
 
 	
 	//maybe a set of non primes
+	void resetState();
 	set<AttributeSet> getCandidateKeys();
 
 	int findCandidateKeys(set<FunctionalDependency>, AttributeSet);

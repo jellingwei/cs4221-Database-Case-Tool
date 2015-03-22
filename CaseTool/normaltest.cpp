@@ -60,7 +60,6 @@ namespace normalTest {
 	
 
 	int findCandidateKeys(set<FunctionalDependency> relation, AttributeSet attr){
-		resetState();
 
 		int attrSize = attr.size();
 		int theEnd = 0; // the expected number of sets in powerSet per iteration
@@ -90,6 +89,7 @@ namespace normalTest {
 			numberOfFirstIter--; 
 			//============================================================
 		}
+		
 		//qDebug() << QString("first loop results");
 		//test function ----------------------------------------------------------------------
 		//int mySize;

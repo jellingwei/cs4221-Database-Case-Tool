@@ -401,6 +401,20 @@ AttributeSet fullAttributeSet() {
 	return fullAttr;
 }
 
+
+void debugCandidateKeys(set<AttributeSet> candidateKeys) {
+	string attrsStr;
+	for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
+		set<int> keysAttr = iter->getAttributes();
+		for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
+			attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
+		}
+		attrsStr += ", ";
+	}
+	qDebug() << "candidate keys are " << QString(attrsStr.c_str());
+
+}
+
 void CaseTool::runBernstein() {
 
 	ui.outputList->clear();
@@ -425,7 +439,7 @@ void CaseTool::runBernstein() {
 	}
 	
 	// step 2...
-	string step2Separator = "Step 2:";
+	string step2Separator = "\nStep 2:";
 	QListWidgetItem *stepWidget2 = new QListWidgetItem(QString(step2Separator.c_str()), ui.outputList);
 	//item->setData(Qt::UserRole, QString(step2Separator.c_str()));
 
@@ -441,7 +455,7 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 3
-	string step3Separator = "Step 3:";
+	string step3Separator = "\nStep 3:";
 	QListWidgetItem *stepWidget3 = new QListWidgetItem(QString(step3Separator.c_str()), ui.outputList);
 	ui.outputList->setCurrentItem(stepWidget3);
 
@@ -460,7 +474,7 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 4
-	string step4Separator = "Step 4:";
+	string step4Separator = "\nStep 4:";
 	QListWidgetItem *stepWidget4 = new QListWidgetItem(QString(step4Separator.c_str()), ui.outputList);
 	ui.outputList->setCurrentItem(stepWidget4);
 
@@ -482,7 +496,7 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 5
-	string step5Separator = "Step 5:";
+	string step5Separator = "\nStep 5:";
 	QListWidgetItem *stepWidget5 = new QListWidgetItem(QString(step5Separator.c_str()), ui.outputList);
 	ui.outputList->setCurrentItem(stepWidget5);
 
@@ -504,7 +518,7 @@ void CaseTool::runBernstein() {
 	}
 
 	// step 6
-	string step6Separator = "Step 6:";
+	string step6Separator = "\nStep 6:";
 	item = new QListWidgetItem(QString(step6Separator.c_str()), ui.outputList);
 	item->setData(Qt::UserRole, QString(step6Separator.c_str()));
 
@@ -535,21 +549,54 @@ void CaseTool::runBernstein() {
 		ui.outputList->setCurrentItem(item);
 	}
 
+	string step8Separator = "\nFinal set of relation, finding all candidate keys";
+	item = new QListWidgetItem(QString(step8Separator.c_str()), ui.outputList);		
+	ui.outputList->setCurrentItem(item);
+
+
+	set<AttributeSet> keysForRelation;  // set of attributes that form key for at least one relation
+
+	// step 8 : find all keys for every relation
+	for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
+		// extension: find all keys of the relation
+		AttributeSet attrSet = iter->first;
+		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attrSet, allFdAfterPartitioning);
+
+		keysForRelation.insert(candidateKeys.begin(), candidateKeys.end());
+
+		qDebug() << "-----";
+		debugCandidateKeys(candidateKeys);
+
+		set<int> attrs = iter->first.getAttributes();
+		string attrsStr = "";
+		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
+			attrsStr += std::to_string(static_cast<long long>(*iter));
+		}
+		attrsStr += "  keys are: ";
+
+		for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
+			set<int> keysAttr = iter->getAttributes();
+			
+			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
+				attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
+			}
+
+			attrsStr += ", ";
+		}
+
+		item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);		
+		ui.outputList->setCurrentItem(item);	
+
+		
+	}
+
 	// step 7
-	string step7Separator = "Step 7: add additional relation";
+	string step7Separator = "\nStep 7: add additional relation";
 	string attrsStr;
 
 	qDebug() << "=============================";
 	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(), allFdAfterPartitioning);
 
-	for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
-		set<int> keysAttr = iter->getAttributes();
-		for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
-			attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
-		}
-		attrsStr += ", ";
-	}
-	qDebug() << "candidate keys are " << QString(attrsStr.c_str());
 
 	AttributeSet smallestKey = getSmallestKey(candidateKeys);
 	set<int> attrs = smallestKey.getAttributes();
@@ -561,7 +608,8 @@ void CaseTool::runBernstein() {
 	for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
 		attrsStr += std::to_string(static_cast<long long>(*iter));
 	}
-	if (finalAnswer.count(extraRelation) == 0) {
+	// check if the extra relation is a key to some relation
+	if (keysForRelation.count(extraRelation.first) == 0) {
 		item = new QListWidgetItem(QString(step7Separator.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(step7Separator.c_str()));
 		ui.outputList->setCurrentItem(item);
@@ -572,28 +620,6 @@ void CaseTool::runBernstein() {
 		ui.outputList->setCurrentItem(item);
 	}
 
-
-	// step 8 : find all keys for every relation
-	for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
-		// extension: find all keys of the relation
-		AttributeSet attrSet;
-		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attrSet, allFdAfterPartitioning);
-
-		set<int> attrs = iter->first.getAttributes();
-		string attrsStr;
-		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
-			attrsStr += std::to_string(static_cast<long long>(*iter));
-		}
-		attrsStr += "  keys are: ";
-		for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
-			set<int> keysAttr = iter->getAttributes();
-			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
-				attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
-			}
-			attrsStr += ", ";
-		}
-
-	}
 	
 }
 
