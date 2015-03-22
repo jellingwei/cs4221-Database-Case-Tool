@@ -247,7 +247,7 @@ namespace ltk {
 		AttributeSet smallestKey = getSmallestKey(candidateKeys);
 		pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
 
-		if (finalAnswer.count(extraRelation) == 0 && extraRelation.first.getAttributes() != smallestKey.getAttributes()) {
+		if (finalAnswer.count(extraRelation) == 0) {
 			Relation relation(extraRelation.first, extraRelation.second);
 			finalRelations.insert(relation);
 		}

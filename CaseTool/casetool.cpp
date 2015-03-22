@@ -356,7 +356,7 @@ void CaseTool::runNormalFormTester() {
 	}
 
 	AttributeSet attrSet (setOfAllAttrs);
-
+	normalTest::resetState();
 	char ans = normalTest::rootProcess(fdSet, attrSet);
 	string nf = "bug";
 	if (ans == '1') {
