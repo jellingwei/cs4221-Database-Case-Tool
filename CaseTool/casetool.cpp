@@ -557,6 +557,7 @@ void CaseTool::runBernstein() {
 	set<AttributeSet> keysForRelation;  // set of attributes that form key for at least one relation
 
 	// step 8 : find all keys for every relation
+	int relNum = 0;
 	for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
 		// extension: find all keys of the relation
 		AttributeSet attrSet = iter->first;
@@ -564,37 +565,29 @@ void CaseTool::runBernstein() {
 
 		keysForRelation.insert(candidateKeys.begin(), candidateKeys.end());
 
-		qDebug() << "-----";
 		debugCandidateKeys(candidateKeys);
 
-		set<int> attrs = iter->first.getAttributes();
-		string attrsStr = "";
-		for (auto iter = attrs.begin(); iter != attrs.end(); ++iter) {
-			attrsStr += std::to_string(static_cast<long long>(*iter));
+	
+		string attrStr = "R" + std::to_string(static_cast<long long>(++relNum)) + ": " + attrSet.toString();
+		string keyStr;
+
+		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(attrStr.c_str()));
+		keyStr = "Key(s): ";
+
+		for (auto keyItr = candidateKeys.begin(); keyItr != candidateKeys.end(); ++keyItr) {
+			AttributeSet key = *keyItr;
+			keyStr += key.toString() + ", ";
 		}
-		attrsStr += "  keys are: ";
-
-		for (auto iter = candidateKeys.begin(); iter != candidateKeys.end(); ++iter) {
-			set<int> keysAttr = iter->getAttributes();
-			
-			for (auto iter2 = keysAttr.begin(); iter2 != keysAttr.end(); ++iter2) {
-				attrsStr += std::to_string(static_cast<long long>(*iter2)) ;
-			}
-
-			attrsStr += ", ";
-		}
-
-		item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);		
-		ui.outputList->setCurrentItem(item);	
-
-		
+		keyStr.resize(keyStr.size() - 2);
+		item = new QListWidgetItem(QString(keyStr.c_str()), ui.outputList);
+		item->setData(Qt::UserRole, QString(keyStr.c_str()));
 	}
 
 	// step 7
-	string step7Separator = "\nStep 7: add additional relation";
+	string step7Separator = "\nStep 7: add additional relation for reconstructability";
 	string attrsStr;
 
-	qDebug() << "=============================";
 	set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(), allFdAfterPartitioning);
 
 
