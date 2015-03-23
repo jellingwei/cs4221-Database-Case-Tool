@@ -25,6 +25,7 @@ public slots:
 	void deleteSelectedFD();
 	void runLTK();
 	void runNormalFormTester();
+	void runAttributeClosure();
 	void runBernstein();
 	string displayFD(FunctionalDependency fd);
 	

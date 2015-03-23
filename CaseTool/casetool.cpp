@@ -409,6 +409,16 @@ void CaseTool::runNormalFormTester() {
 	ui.outputNF->setCurrentItem(item);
 }
 
+void CaseTool::runAttributeClosure() {
+	AttributeSet startingSet = AttributeSet(lhs);
+
+	AttributeSet closure = startingSet.getAttributeClosure(functionalDependecies);
+
+	QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(displayAttributeSet(closure)), ui.outputAttrClosure);
+	
+	ui.outputAttrClosure->setCurrentItem(item);
+}
+
 AttributeSet getSmallestKey(set<AttributeSet> candidateKeys) {
 	AttributeSet answer;
 	bool isSet = false;
