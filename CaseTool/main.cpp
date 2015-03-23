@@ -173,7 +173,7 @@ void normaltest_test(){
 	//qDebug() << QString("fd2 inserted!");
 	//fdSett.insert(fd3); qDebug() << QString("fd3 inserted!");
 	
-	char normalForm = normalTest::rootProcess(fdSett, attrSet);
+	char normalForm = normalTest::normalTestRootProcess(fdSett, attrSet);
 
 	//qDebug() << QString("result is: ") << numResult;
 }

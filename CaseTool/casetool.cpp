@@ -389,7 +389,7 @@ void CaseTool::runNormalFormTester() {
 
 	AttributeSet attrSet (setOfAllAttrs);
 	normalTest::resetState();
-	char ans = normalTest::rootProcess(fdSet, attrSet);
+	char ans = normalTest::normalTestRootProcess(fdSet, attrSet);
 	string nf = "bug";
 	if (ans == '1') {
 		nf = "1NF";
@@ -401,6 +401,8 @@ void CaseTool::runNormalFormTester() {
 		nf = "BCNF";
 	} else if (ans == 'e'){
 		nf = "EKNF";
+	} else if (ans == 'f'){
+		nf = "BCNF (No FDs)";
 	}
 
 	QListWidgetItem *item = new QListWidgetItem(QString(nf.c_str()), ui.outputNF);

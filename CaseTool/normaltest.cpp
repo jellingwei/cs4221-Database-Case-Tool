@@ -39,13 +39,13 @@ namespace normalTest {
 		return result;
 	}
 	
-	char rootProcess(set<FunctionalDependency> relation, AttributeSet attr){
+	char normalTestRootProcess(set<FunctionalDependency> relation, AttributeSet attr){
 		//if empty return 0
 		if(attr.getAttributes().empty()){
 			return 0;
 		}
 		if(relation.empty()){
-			return 'b';
+			return 'f';
 		}
 		
 		//find set of candidate keys
