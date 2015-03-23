@@ -232,11 +232,17 @@ namespace ltk {
 		partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
 		set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);
 		partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);
+		partitions = bernstein::addFdInJBackToCorrespondingGroup(partitions);
 		set<pair<AttributeSet, set<AttributeSet> > > finalAnswer = bernstein::constructRelations(partitions);
+		set<AttributeSet> keysForRelation;  // set of attributes that form key for at least one relation
 
 		for (auto relItr = finalAnswer.begin(); relItr != finalAnswer.end(); ++relItr) {
 			AttributeSet attributes = relItr->first;
 			set<AttributeSet> keys = relItr->second;
+
+			set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attributes, allFdAfterPartitioning);
+			keysForRelation.insert(candidateKeys.begin(), candidateKeys.end());
+
 			if (attributes.size() != 0 && keys.size() != 0) {
 				Relation relation(attributes, keys);
 				finalRelations.insert(relation);
@@ -247,7 +253,7 @@ namespace ltk {
 		AttributeSet smallestKey = getSmallestKey(candidateKeys);
 		pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
 
-		if (finalAnswer.count(extraRelation) == 0) {
+		if (keysForRelation.count(extraRelation.first) == 0) {
 			Relation relation(extraRelation.first, extraRelation.second);
 			finalRelations.insert(relation);
 		}
