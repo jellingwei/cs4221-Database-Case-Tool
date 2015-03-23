@@ -41,9 +41,13 @@ namespace normalTest {
 	
 	char rootProcess(set<FunctionalDependency> relation, AttributeSet attr){
 		//if empty return 0
-		if(relation.empty() || attr.getAttributes().empty()){
+		if(attr.getAttributes().empty()){
 			return 0;
 		}
+		if(relation.empty()){
+			return 'b';
+		}
+		
 		//find set of candidate keys
 		//run tests
 		set<int> attributes = attr.getAttributes();
