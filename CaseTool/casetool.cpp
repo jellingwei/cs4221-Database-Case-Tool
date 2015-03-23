@@ -591,9 +591,15 @@ void CaseTool::runBernstein() {
 		item = new QListWidgetItem(QString(step5Explanation.c_str()), ui.outputList);
 	}
 
+	partitions = bernstein::addFdInJBackToCorrespondingGroup(partitions);
+
 	item = new QListWidgetItem(QString("--------"), ui.outputList);
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
+
+		if (fdSet.size() == 0) {
+			continue;
+		}
 
 		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
 			FunctionalDependency fd = *fdIter;

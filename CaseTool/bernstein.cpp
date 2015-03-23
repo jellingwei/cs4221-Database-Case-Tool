@@ -331,11 +331,42 @@ namespace bernstein {
 	}
 
 
+	unordered_map<AttributeSet, set<FunctionalDependency> > bernstein::addFdInJBackToCorrespondingGroup(unordered_map<AttributeSet, set<FunctionalDependency> > partitions) {
+		// In the notes, this is for step 5
+		// need to first add each FD in J to its corresponding group
+		set<int> emptySet; AttributeSet equivalentAttrSet(emptySet);
+		if (partitions.count(equivalentAttrSet) != 0) {
+			set<FunctionalDependency> jFd = partitions[equivalentAttrSet];
+
+			// for every FD in the set J, try to find a corresponding group to add the FD back
+			for (auto fdIter = jFd.begin(); fdIter != jFd.end(); ++fdIter) {
+				FunctionalDependency fd = *fdIter;
+
+				AttributeSet lhs = fd.getLhs();
+				AttributeSet rhs = fd.getRhs();
+				bool fdHasCorrespondingGroupInLhs = (partitions.count(lhs) != 0);
+				if (fdHasCorrespondingGroupInLhs) {
+					partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
+					partitions[lhs] = addFdToSet(partitions[lhs], fd);
+				} else {
+					bool fdHasCorrespondingGroupInRhs = (partitions.count(rhs) != 0);
+					if (fdHasCorrespondingGroupInRhs) {
+						partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
+						partitions[rhs] = addFdToSet(partitions[rhs], fd);
+					}
+
+				}
+			}
+		}
+		return partitions;
+	}
+
 	/**
 	 * The second parameter is the result from createSetOfFDFromPartitions.
 	 * 
 	 */
 	unordered_map<AttributeSet, set<FunctionalDependency> > eliminateTransitiveDependenciesForPartition(unordered_map<AttributeSet, set<FunctionalDependency> > partitions, set<FunctionalDependency> allFd) {
+		step2Output.clear();
 		set<FunctionalDependency> currentFdSet = allFd;
 		unordered_map<AttributeSet, set<FunctionalDependency> > finalPartitions = partitions;
 
@@ -373,36 +404,10 @@ namespace bernstein {
 	}
 
 	
+	
 	set<std::pair<AttributeSet, set<AttributeSet> > >  constructRelations(unordered_map<AttributeSet, set<FunctionalDependency> > partitions) {
 		set<std::pair<AttributeSet, set<AttributeSet> > > finalAnswer;
 
-		// In the notes, this is for step 5
-		// need to first add each FD in J to its corresponding group
-		set<int> emptySet; AttributeSet equivalentAttrSet(emptySet);
-		if (partitions.count(equivalentAttrSet) != 0) {
-			set<FunctionalDependency> jFd = partitions[equivalentAttrSet];
-
-			// for every FD in the set J, try to find a corresponding group to add the FD back
-			for (auto fdIter = jFd.begin(); fdIter != jFd.end(); ++fdIter) {
-				FunctionalDependency fd = *fdIter;
-
-				AttributeSet lhs = fd.getLhs();
-				AttributeSet rhs = fd.getRhs();
-				bool fdHasCorrespondingGroupInLhs = (partitions.count(lhs) != 0);
-				if (fdHasCorrespondingGroupInLhs) {
-					partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
-					partitions[lhs] = addFdToSet(partitions[lhs], fd);
-				} else {
-					bool fdHasCorrespondingGroupInRhs = (partitions.count(rhs) != 0);
-					if (fdHasCorrespondingGroupInRhs) {
-						partitions[equivalentAttrSet] = dropFdFromSet(partitions[equivalentAttrSet], fd);
-						partitions[rhs] = addFdToSet(partitions[rhs], fd);
-					}
-
-				}
-			}
-		}
-		// ------ @todo: put the above into a seperate function
 
 		// construct relations
 		for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
