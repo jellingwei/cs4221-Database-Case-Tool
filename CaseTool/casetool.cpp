@@ -523,6 +523,8 @@ void CaseTool::runBernstein() {
 	for (auto iter = partitions.begin(); iter != partitions.end(); ++iter) {
 		set<FunctionalDependency> fdSet = iter->second;
 
+		item = new QListWidgetItem(QString(("Partition for " + displayAttributeSet(iter->first) + ":").c_str()), ui.outputList);
+
 		for (auto fdIter = fdSet.begin(); fdIter != fdSet.end(); ++fdIter) {
 			FunctionalDependency fd = *fdIter;
 			string fdStr = displayFD(fd);
@@ -551,10 +553,10 @@ void CaseTool::runBernstein() {
 
 		AttributeSet lhs = iter->first;
 		if (lhs.size() != 0 ) {
-			string partitionSeperator = string("Partition ") + std::to_string(static_cast<long long>(++partitionNum));
+			string partitionSeperator = string("Partition ") + std::to_string(static_cast<long long>(++partitionNum)) + string(":");
 			item = new QListWidgetItem(partitionSeperator.c_str(), ui.outputList);
 		} else {
-			string partitionSeperator = string("Partition J");
+			string partitionSeperator = string("Partition J:");
 			item = new QListWidgetItem(partitionSeperator.c_str(), ui.outputList);
 		}
 
@@ -629,7 +631,7 @@ void CaseTool::runBernstein() {
 		ui.outputList->setCurrentItem(item);
 	}
 
-	string step8Separator = "\nFinal set of relation, with all candidate keys listed";
+	string step8Separator = "\nFinal relations";
 	item = new QListWidgetItem(QString(step8Separator.c_str()), ui.outputList);		
 	ui.outputList->setCurrentItem(item);
 
@@ -683,10 +685,13 @@ void CaseTool::runBernstein() {
 	if (keysForRelation.count(extraRelation.first) == 0) {
 		item = new QListWidgetItem(QString(step7Separator.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(step7Separator.c_str()));
-		ui.outputList->setCurrentItem(item);
 
-		item = new QListWidgetItem(QString(attrsStr.c_str()), ui.outputList);
-		item->setData(Qt::UserRole, QString(attrsStr.c_str()));
+		string attrStr = "R" + std::to_string(static_cast<long long>(++relNum)) + ": " + attrsStr;
+		
+		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputList);
+
+		string keyStr = "Key(s): " + attrsStr;
+		item = new QListWidgetItem(QString(keyStr.c_str()), ui.outputList);
 
 		ui.outputList->setCurrentItem(item);
 	}
