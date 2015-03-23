@@ -6,6 +6,10 @@
 using namespace std;
 
 
+FunctionalDependency::FunctionalDependency() {
+
+}
+
 FunctionalDependency::FunctionalDependency(set<int> leftSide, set<int> rightSide) {
 	lhs = leftSide;
 	rhs = rightSide;

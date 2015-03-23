@@ -14,6 +14,7 @@ class AttributeSet;
 
 class FunctionalDependency {
 public:
+	FunctionalDependency();
 	FunctionalDependency(set<int>, set<int>);
 	FunctionalDependency(AttributeSet, AttributeSet);
 

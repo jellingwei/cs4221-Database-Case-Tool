@@ -22,6 +22,7 @@ public slots:
 	void addRhsToFd(bool);
 	void numOfAttributes();
 	void reset();
+	void deleteSelectedFD();
 	void runLTK();
 	void runNormalFormTester();
 	void runBernstein();

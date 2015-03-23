@@ -41,7 +41,7 @@ vector<QCheckBox*> lhsCheckBox;
 vector<QCheckBox*> rhsCheckBox;
 
 set<FunctionalDependency> functionalDependecies;
-
+unordered_map<string, FunctionalDependency> fdStrToFd;
 
 string getTextOfCheckbox(int i) {
 	char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
@@ -89,9 +89,9 @@ void CaseTool::showFD(FunctionalDependency fd) {
 	string ans = displayFD(fd);
 	QListWidgetItem *item = new QListWidgetItem(QString(ans.c_str()), ui.FDList);
 	
+	fdStrToFd[ans] = fd;
+
 	ui.FDList->setCurrentItem(item);
-
-
 }
 
 void CaseTool::addFD() {
@@ -140,7 +140,11 @@ void CaseTool::addLhsToFd(bool isChecked){
 		if (isChecked && name==qstr) {
 			lhs.insert(i);
 			qDebug() << i;
+		} else if (!isChecked && name==qstr) {
+			lhs.erase(i);
 		}
+
+
 	}
 
 }
@@ -165,6 +169,8 @@ void CaseTool::addRhsToFd(bool isChecked){
 		if (isChecked && name==qstr) {
 			rhs.insert(i);
 			qDebug() << i;
+		} else if (!isChecked && name==qstr) {
+			rhs.erase(i);
 		}
 	}
 }
@@ -182,7 +188,6 @@ void clearLayout(QLayout *layout){
         delete item;
     }
 }
-
 
 
 void CaseTool::numOfAttributes() {
@@ -252,6 +257,20 @@ void CaseTool::reset() {
 	ui.outputLTK->clear();
 	ui.outputNF->clear();
 	numOfAttributes();
+}
+
+void CaseTool::deleteSelectedFD() {
+	QList<QListWidgetItem*> list =  ui.FDList->selectedItems();
+	for (auto iter = list.begin(); iter != list.end(); ++iter) {
+		QListWidgetItem* item = *iter;
+		QString fdStr = item->text();		
+
+		FunctionalDependency fd = fdStrToFd[fdStr.toStdString()];
+		functionalDependecies.erase(fd);
+	}
+
+	qDeleteAll(ui.FDList->selectedItems());
+	
 }
 
 void CaseTool::runLTK() {

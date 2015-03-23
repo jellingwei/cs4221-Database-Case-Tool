@@ -279,7 +279,7 @@
    <slot>addFD()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>99</x>
+     <x>94</x>
      <y>315</y>
     </hint>
     <hint type="destinationlabel">
@@ -384,6 +384,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>deleteButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>CaseToolClass</receiver>
+   <slot>deleteSelectedFD()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>449</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>516</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addLhsToFd(bool)</slot>
@@ -395,5 +411,6 @@
   <slot>runNormalFormTester()</slot>
   <slot>reset()</slot>
   <slot>runLTK()</slot>
+  <slot>deleteSelectedFD()</slot>
  </slots>
 </ui>
