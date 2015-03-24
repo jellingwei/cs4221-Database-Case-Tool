@@ -4,6 +4,7 @@
 
 #include <QVBoxLayout>
 #include <QCheckBox>
+#include <QLineEdit>
 #include <qDebug>
 
 #include "casetool.h"
@@ -39,9 +40,11 @@ int numAttributes;
 
 vector<QCheckBox*> lhsCheckBox;
 vector<QCheckBox*> rhsCheckBox;
+vector<QLineEdit*> attrLineEdit;
 
 set<FunctionalDependency> functionalDependecies;
 unordered_map<string, FunctionalDependency> fdStrToFd;
+vector<string> attrNames;
 
 string getTextOfCheckbox(int i) {
 	char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
@@ -189,9 +192,38 @@ void clearLayout(QLayout *layout){
     }
 }
 
+void CaseTool::renameAttr(const QString & text) {
+	QObject* obj = sender();
+	QLineEdit* emittingLineEdit = dynamic_cast<QLineEdit*>(obj);
+
+	QString name = emittingLineEdit->objectName();
+	QString newText = emittingLineEdit->text();
+
+	for (int i = 0; i < numAttributes; i++) {
+		string attrName = "attrName";
+		attrName += std::to_string(static_cast<long long>(i + 1));
+		
+		QCheckBox* leftCheckBox = lhsCheckBox[i];
+		QCheckBox* rightCheckBox = rhsCheckBox[i];
+
+		if (name == QString::fromStdString(attrName)) {
+			leftCheckBox->setText(newText);
+			rightCheckBox->setText(newText);
+		}
+	}
+
+}
 
 void CaseTool::numOfAttributes() {
 	numAttributes = ui.numOfAttributes->value();
+
+	if (ui.attrNameScrollArea->layout() != NULL) {
+		clearLayout(ui.attrNameScrollArea->layout());
+		attrLineEdit.clear();
+		attrNames.clear();
+
+		delete ui.attrNameScrollArea->layout();
+	}
 
 	if (ui.scrollArea->layout() != NULL) {
 		clearLayout(ui.scrollArea->layout());
@@ -208,6 +240,27 @@ void CaseTool::numOfAttributes() {
 
 		delete ui.scrollArea2->layout() ;
 	}
+
+	
+	QVBoxLayout *attrNamelay = new QVBoxLayout(this);
+	attrNamelay->setDirection(QBoxLayout::LeftToRight);
+	for(int i=0; i < numAttributes; i++)
+	{
+		QLineEdit* dynamic = new QLineEdit("");
+		string name = "attrName";
+		name += std::to_string(static_cast<long long>(i + 1));
+
+		dynamic->setObjectName(QString(name.c_str()));
+		qDebug() <<QString(name.c_str());
+
+		dynamic->setText (QString(getTextOfCheckbox(i).c_str()));
+		attrNamelay->addWidget(dynamic);
+
+		QObject::connect(dynamic, SIGNAL(textChanged(const QString &)), SLOT(renameAttr(const QString &)));
+
+		attrLineEdit.push_back(dynamic);
+	}
+	ui.attrNameScrollArea->setLayout(attrNamelay);
 
 	QVBoxLayout *lay = new QVBoxLayout(this);
 	lay->setDirection(QBoxLayout::LeftToRight);

@@ -27,6 +27,7 @@ public slots:
 	void runNormalFormTester();
 	void runAttributeClosure();
 	void runBernstein();
+	void renameAttr(const QString & text);
 	string displayFD(FunctionalDependency fd);
 	
 private:
