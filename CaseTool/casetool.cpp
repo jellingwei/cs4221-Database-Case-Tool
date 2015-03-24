@@ -514,6 +514,12 @@ void CaseTool::runNormalFormTester() {
 
 void CaseTool::runAttributeClosure() {
 	AttributeSet startingSet = AttributeSet(lhs);
+	ui.outputAttrClosure->clear();
+
+	if (startingSet.size() == 0) {
+		QListWidgetItem *item = new QListWidgetItem("Enter the attributes to find a closure for under LHS", ui.outputAttrClosure);
+		return;
+	}
 
 	AttributeSet closure = startingSet.getAttributeClosure(functionalDependecies);
 
