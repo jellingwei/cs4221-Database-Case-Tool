@@ -123,6 +123,7 @@ namespace ltk {
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > createSynthesizedFDs(set<Relation> relationSet) {	
 		unordered_map<AttributeSet, set<FunctionalDependency>> newFDs;
+		globalSynthesizedFDs.clear();
 		
 		for (auto relItr = relationSet.begin(); relItr != relationSet.end(); ++relItr) {
 			Relation relation = *relItr;
@@ -226,35 +227,45 @@ namespace ltk {
 		set<Relation> finalRelations;
 
 		//Run Bernstein algorithm
-		set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(startFd);
-		set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(startFd);
-		unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);
-		partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);
-		set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);
-		partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);
+		set<FunctionalDependency> newFdSet = bernstein::removeRedundantAttributes(startFd);  //Step 1
+		set<FunctionalDependency> minimalCover = bernstein::obtainMinimalCover(startFd);  //Step 2
+		unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);  //Step 3
+		partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);  // step 4
+
+		//set<int> emptySet;
+		set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);  // step 5
+		partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);  // step 5
 		partitions = bernstein::addFdInJBackToCorrespondingGroup(partitions);
-		set<pair<AttributeSet, set<AttributeSet> > > finalAnswer = bernstein::constructRelations(partitions);
+		set<std::pair<AttributeSet, set<AttributeSet> > > finalAnswer = bernstein::constructRelations(partitions);  // step 6
+
 		set<AttributeSet> keysForRelation;  // set of attributes that form key for at least one relation
 
-		for (auto relItr = finalAnswer.begin(); relItr != finalAnswer.end(); ++relItr) {
-			AttributeSet attributes = relItr->first;
-			set<AttributeSet> keys = relItr->second;
-
-			set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attributes, allFdAfterPartitioning);
+		// step 8 : find all keys for every relation
+		//int relNum = 0;
+		for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
+			// extension: find all keys of the relation
+			AttributeSet attrSet = iter->first;
+			set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attrSet, allFdAfterPartitioning);
 			keysForRelation.insert(candidateKeys.begin(), candidateKeys.end());
 
-			if (attributes.size() != 0 && keys.size() != 0) {
-				Relation relation(attributes, keys);
-				finalRelations.insert(relation);
-			}
+			set<AttributeSet> keys = iter->second;
+			Relation relation(attrSet, keys);
+			finalRelations.insert(relation);
 		}
 
+		// step 7
 		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(numAttributes), allFdAfterPartitioning);
-		AttributeSet smallestKey = getSmallestKey(candidateKeys);
-		pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
 
+		AttributeSet smallestKey = getSmallestKey(candidateKeys);
+		set<int> attrs = smallestKey.getAttributes();
+
+		std::pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
+
+		// check if the extra relation is a key to some relation
 		if (keysForRelation.count(extraRelation.first) == 0) {
-			Relation relation(extraRelation.first, extraRelation.second);
+			AttributeSet attrSet = extraRelation.first;
+			set<AttributeSet> keys = extraRelation.second;
+			Relation relation(attrSet, keys);
 			finalRelations.insert(relation);
 		}
 		return finalRelations;
