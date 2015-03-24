@@ -412,6 +412,7 @@ void CaseTool::runLTK() {
 	item->setData(Qt::UserRole, QString(step3Separator.c_str()));
 
 	vector<Relation> prepRelations(preparatoryRelations.begin(), preparatoryRelations.end());
+
 	for (unsigned int i = 0; i < prepRelations.size(); i++) {
 		Relation rel = prepRelations[i];
 		AttributeSet attributes = rel.getAttributes();
@@ -419,6 +420,7 @@ void CaseTool::runLTK() {
 		vector<int> attrVec(attrSet.begin(), attrSet.end());
 
 		for (unsigned int j = 0; j < attrVec.size(); j++) {
+			rel = prepRelations[i];
 			string step3;
 			step3 += "Check if ";
 			step3 += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
@@ -450,6 +452,24 @@ void CaseTool::runLTK() {
 				std::swap(newRelation, prepRelations[i]);
 				//i--;  //Rerun the algorithm again
 				//break;
+				preparatoryRelations.erase(rel);
+				preparatoryRelations.insert(prepRelations[i]);
+				unordered_map<AttributeSet, set<FunctionalDependency> > synFD = ltk::createSynthesizedFDs(preparatoryRelations);
+				string message = "Created new global synthesized FDs";
+				item = new QListWidgetItem(QString(message.c_str()), ui.outputLTK);
+				item->setData(Qt::UserRole, QString(message.c_str()));
+				ui.outputLTK->setCurrentItem(item);
+
+				for (auto synFdItr = synFD.begin(); synFdItr != synFD.end(); ++ synFdItr) {
+					set<FunctionalDependency> fdSet = synFdItr->second;
+					for (auto fdItr = fdSet.begin(); fdItr != fdSet.end(); ++fdItr) {
+						FunctionalDependency fd = *fdItr;
+						string fdStr = displayFD(fd);
+						item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputLTK);
+						item->setData(Qt::UserRole, QString(fdStr.c_str()));
+						ui.outputLTK->setCurrentItem(item);
+					}
+				}
 			}
 		}
 	}
