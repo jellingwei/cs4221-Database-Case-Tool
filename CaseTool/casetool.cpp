@@ -244,7 +244,7 @@ void CaseTool::renameAttr(const QString & text) {
 
 						item->setText( QString::fromStdString(displayFD(fd) ) );
 						fdStrToFd.erase(oldAttrName);
-						fdStrToFd[text.toStdString()] = fd;
+						fdStrToFd[displayFD(fd)] = fd;
 				}
 				
 			}
