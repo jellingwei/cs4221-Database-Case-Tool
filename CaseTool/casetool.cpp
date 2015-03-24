@@ -109,7 +109,7 @@ string displayAttributeSet(AttributeSet attrSet) {
 QListWidgetItem* CaseTool::showFD(FunctionalDependency fd) {
 	string ans = displayFD(fd);
 	QListWidgetItem *item = new QListWidgetItem(QString(ans.c_str()), ui.FDList);
-	
+
 	fdStrToFd[ans] = fd;
 
 	ui.FDList->setCurrentItem(item);
@@ -120,7 +120,7 @@ void CaseTool::addFD() {
 	FunctionalDependency fd(lhs, rhs);
 	functionalDependecies.insert(fd);
 
-	
+
 	if(!lhs.empty() && !rhs.empty()) {
 		fdToDisplayedItem[fd] = showFD(fd);
 	} else {
@@ -199,17 +199,17 @@ void CaseTool::addRhsToFd(bool isChecked){
 }
 
 void clearLayout(QLayout *layout){
-    QLayoutItem *item;
-    while((item = layout->takeAt(0))) {
-        if (item->layout()) {
-            clearLayout(item->layout());
-            delete item->layout();
-        }
-        if (item->widget()) {
-            delete item->widget();
-        }
-        delete item;
-    }
+	QLayoutItem *item;
+	while((item = layout->takeAt(0))) {
+		if (item->layout()) {
+			clearLayout(item->layout());
+			delete item->layout();
+		}
+		if (item->widget()) {
+			delete item->widget();
+		}
+		delete item;
+	}
 }
 
 void CaseTool::renameAttr(const QString & text) {
@@ -221,7 +221,7 @@ void CaseTool::renameAttr(const QString & text) {
 	for (int i = 0; i < numAttributes; i++) {
 		string attrName = "attrName";
 		attrName += std::to_string(static_cast<long long>(i + 1));
-		
+
 		QCheckBox* leftCheckBox = lhsCheckBox[i];
 		QCheckBox* rightCheckBox = rhsCheckBox[i];
 
@@ -234,11 +234,11 @@ void CaseTool::renameAttr(const QString & text) {
 
 			for (auto iter = functionalDependecies.begin(); iter != functionalDependecies.end(); ++iter) {
 				FunctionalDependency fd = *iter;
-				
+
 				set<int> setWithUpdatedName;  setWithUpdatedName.insert(i);
 				if (fd.getLhsAttrSet().containsAttributes(setWithUpdatedName) || 
 					fd.getRhsAttrSet().containsAttributes(setWithUpdatedName)) {
-					
+
 						// change display of FD
 						QListWidgetItem* item = fdToDisplayedItem[fd];
 
@@ -246,7 +246,7 @@ void CaseTool::renameAttr(const QString & text) {
 						fdStrToFd.erase(oldAttrName);
 						fdStrToFd[displayFD(fd)] = fd;
 				}
-				
+
 			}
 		}
 	}
@@ -280,7 +280,7 @@ void CaseTool::numOfAttributes() {
 		delete ui.scrollArea2->layout() ;
 	}
 
-	
+
 	QVBoxLayout *attrNamelay = new QVBoxLayout(this);
 	attrNamelay->setDirection(QBoxLayout::LeftToRight);
 	vector<string> tempAttrNames;
@@ -371,7 +371,7 @@ void CaseTool::deleteSelectedFD() {
 	}
 
 	qDeleteAll(ui.FDList->selectedItems());
-	
+
 }
 
 void CaseTool::runLTK() {
@@ -419,43 +419,51 @@ void CaseTool::runLTK() {
 		set<int> attrSet = attributes.getAttributes();
 		vector<int> attrVec(attrSet.begin(), attrSet.end());
 
+		string output = "\nChecking " + displayAttributeSet(attributes) + " for superfluous attributes";
+		item = new QListWidgetItem(QString(output.c_str()), ui.outputLTK);
+		item->setData(Qt::UserRole, QString(output.c_str()));
+
 		for (unsigned int j = 0; j < attrVec.size(); j++) {
 			rel = prepRelations[i];
-			string step3;
-			step3 += "Check if ";
-			step3 += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
-			step3 += " is superfluous in " + displayAttributeSet(attributes);
-			item = new QListWidgetItem(QString(step3.c_str()), ui.outputLTK);
-			item->setData(Qt::UserRole, QString(step3.c_str()));
-
+			attributes = rel.getAttributes();
 			set<int> singleAttrSet;
 			singleAttrSet.insert(attrVec[j]);
 			AttributeSet singleAttr(singleAttrSet);
+
+			string step3;
+			step3 += "Check if " + displayAttributeSet(singleAttrSet) + 
+				" is superfluous in " + displayAttributeSet(attributes);
+			item = new QListWidgetItem(QString(step3.c_str()), ui.outputLTK);
+			item->setData(Qt::UserRole, QString(step3.c_str()));
+
 			set<AttributeSet> returnedKeys = ltk::superfluousAttributeDetection(rel, singleAttr);
 
 			if (returnedKeys.size() == 0) {
 				string notSuperfluous;
-				notSuperfluous += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
-				notSuperfluous += " is not superfluous";
+				notSuperfluous += displayAttributeSet(singleAttrSet) + " is not superfluous";
 				item = new QListWidgetItem(QString(notSuperfluous.c_str()), ui.outputLTK);
 				item->setData(Qt::UserRole, QString(notSuperfluous.c_str()));
 			} else {
 				string superfluous;
-				superfluous += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
-				superfluous += " is superfluous";
+				superfluous += displayAttributeSet(singleAttrSet) + " is superfluous";
 				item = new QListWidgetItem(QString(superfluous.c_str()), ui.outputLTK);
 				item->setData(Qt::UserRole, QString(superfluous.c_str()));
 
+				//Since single attribute is superfluous, remove it
 				AttributeSet finalAttributes = attributes - singleAttr;
-				attributes = attributes - singleAttr;
 				Relation newRelation(finalAttributes, returnedKeys);
-				std::swap(newRelation, prepRelations[i]);
-				//i--;  //Rerun the algorithm again
-				//break;
-				preparatoryRelations.erase(rel);
-				preparatoryRelations.insert(prepRelations[i]);
+				preparatoryRelations.erase(rel);  //Erase the old relation from the set
+				preparatoryRelations.insert(newRelation);  //Insert the reconstructed relation
+				std::swap(newRelation, prepRelations[i]);  //Swap the relations in the vector
+
+				//Print message to state which attribute is removed
+				string remove = "Remove " + displayAttributeSet(singleAttrSet) + " to get " + displayAttributeSet(finalAttributes);
+				item = new QListWidgetItem(QString(remove.c_str()), ui.outputLTK);
+				item->setData(Qt::UserRole, QString(remove.c_str()));
+
+				//Since the relation is reconstructed, construct another set of synthesized FDs
 				unordered_map<AttributeSet, set<FunctionalDependency> > synFD = ltk::createSynthesizedFDs(preparatoryRelations);
-				string message = "Created new global synthesized FDs";
+				string message = "Create new global synthesized FDs";
 				item = new QListWidgetItem(QString(message.c_str()), ui.outputLTK);
 				item->setData(Qt::UserRole, QString(message.c_str()));
 				ui.outputLTK->setCurrentItem(item);
@@ -544,7 +552,7 @@ void CaseTool::runAttributeClosure() {
 	AttributeSet closure = startingSet.getAttributeClosure(functionalDependecies);
 
 	QListWidgetItem *item = new QListWidgetItem(QString::fromStdString(displayAttributeSet(closure)), ui.outputAttrClosure);
-	
+
 	ui.outputAttrClosure->setCurrentItem(item);
 }
 
@@ -610,15 +618,15 @@ void CaseTool::runBernstein() {
 
 	for (auto iter = newFdSet.begin(); iter != newFdSet.end(); ++iter) {
 		FunctionalDependency fd = *iter;
-		
+
 		string fdStr = displayFD(fd);
-		
+
 		QListWidgetItem *item = new QListWidgetItem(QString(fdStr.c_str()), ui.outputList);
 		item->setData(Qt::UserRole, QString(fdStr.c_str()));
 
 		ui.outputList->setCurrentItem(item);
 	}
-	
+
 	// step 2...
 	string step2Separator = "\nStep 2: Find covering";
 	QListWidgetItem *stepWidget2 = new QListWidgetItem(QString(step2Separator.c_str()), ui.outputList);
@@ -750,8 +758,8 @@ void CaseTool::runBernstein() {
 	for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
 		AttributeSet attrsInRelation = iter->first;
 		set<AttributeSet> keys = iter->second;
-		
-		
+
+
 		string attrsStr;
 		attrsStr = displayAttributeSet(attrsInRelation) + '\n';
 		attrsStr += "Key(s) : ";
@@ -784,7 +792,7 @@ void CaseTool::runBernstein() {
 
 		debugCandidateKeys(candidateKeys);
 
-	
+
 		string attrStr = "R" + std::to_string(static_cast<long long>(++relNum)) + ": " + displayAttributeSet(attrSet);
 		string keyStr;
 
@@ -810,9 +818,9 @@ void CaseTool::runBernstein() {
 
 	AttributeSet smallestKey = getSmallestKey(candidateKeys);
 	set<int> attrs = smallestKey.getAttributes();
-	
+
 	std::pair<AttributeSet, set<AttributeSet> > extraRelation = bernstein::constructMissingAttrRelation(finalAnswer, numAttributes, smallestKey);
-		
+
 	attrs = extraRelation.first.getAttributes();
 	attrsStr = displayAttributeSet(attrs);
 
@@ -822,7 +830,7 @@ void CaseTool::runBernstein() {
 		item->setData(Qt::UserRole, QString(step7Separator.c_str()));
 
 		string attrStr = "R" + std::to_string(static_cast<long long>(++relNum)) + ": " + attrsStr;
-		
+
 		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputList);
 
 		string keyStr = "Key(s): " + attrsStr;
@@ -831,6 +839,6 @@ void CaseTool::runBernstein() {
 		ui.outputList->setCurrentItem(item);
 	}
 
-	
+
 }
 

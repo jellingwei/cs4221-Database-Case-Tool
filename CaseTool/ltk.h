@@ -11,6 +11,5 @@ namespace ltk {
 
 	set<Relation> constructPreparatorySchema(set<FunctionalDependency>, int);
 	set<AttributeSet> superfluousAttributeDetection(Relation, AttributeSet);
-	set<Relation> deletionNormalization(AttributeSet, set<FunctionalDependency>);
 	unordered_map<AttributeSet, set<FunctionalDependency> > createSynthesizedFDs(set<Relation> relationSet);
 }

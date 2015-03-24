@@ -32,7 +32,6 @@ namespace ltk {
 	//Outputs the new set of synthesized key of relation if attribute is superfluous
 	//Otherwise, output an empty attribute set
 	set<AttributeSet> superfluousAttributeDetection(Relation preparatoryRelation, AttributeSet singleAttribute) {
-		//Mark attribute as superfluous
 		bool isSuperfluous = true;
 		AttributeSet prepRelationAttributes = preparatoryRelation.getAttributes();
 		set<AttributeSet> prepRelationKeys = preparatoryRelation.getKeys();
@@ -46,16 +45,14 @@ namespace ltk {
 				reducedSynthesizedKeys.insert(synthesizedKey);
 			}
 		}
-		
-		//Construct a new set of synthesized FDs without the single attribute
-		reducedSynthesizedFDs = constructSynthesizedPrimeFDs(prepRelationAttributes, singleAttribute);
-		
+				
 		if (reducedSynthesizedKeys.size() == 0) {
 			isSuperfluous = false;
-			set<AttributeSet> empty;
-			return empty;
 		} else {
 			isSuperfluous = false;
+			//Construct a new set of synthesized FDs without the single attribute
+			reducedSynthesizedFDs = constructSynthesizedPrimeFDs(prepRelationAttributes, singleAttribute);
+
 			for (auto keyItr = reducedSynthesizedKeys.begin(); keyItr != reducedSynthesizedKeys.end(); ++keyItr) {
 				AttributeSet key = *keyItr;
 				if (key.getAttributeClosure(reducedSynthesizedFDs).containsAttributes(singleAttribute)) {
@@ -71,7 +68,7 @@ namespace ltk {
 
 		set<AttributeSet> lostKeys = prepRelationKeys;
 		for (auto keyItr = reducedSynthesizedKeys.begin(); keyItr != reducedSynthesizedKeys.end(); ++keyItr) {
-			lostKeys.erase(*keyItr);
+			lostKeys.erase(*keyItr);  //Get all keys that contains the single attribute
 		}
 		
 		for (auto itr = lostKeys.begin(); itr != lostKeys.end(); ++itr) {
@@ -122,7 +119,6 @@ namespace ltk {
 	}
 
 	unordered_map<AttributeSet, set<FunctionalDependency> > createSynthesizedFDs(set<Relation> relationSet) {	
-		unordered_map<AttributeSet, set<FunctionalDependency>> newFDs;
 		globalSynthesizedFDs.clear();
 		
 		for (auto relItr = relationSet.begin(); relItr != relationSet.end(); ++relItr) {
@@ -137,10 +133,9 @@ namespace ltk {
 				FunctionalDependency fd(key, fdRHS);
 				FDs.insert(fd);
 			}
-			globalSynthesizedFDs[attributes] = FDs;  //For debugging purposes
-			newFDs[attributes] = FDs;
+			globalSynthesizedFDs[attributes] = FDs;
 		}
-		return newFDs;
+		return globalSynthesizedFDs;
 	}
 
 	set<FunctionalDependency> constructSynthesizedPrimeFDs(AttributeSet relAttr, AttributeSet excludeAttr) {
@@ -174,47 +169,6 @@ namespace ltk {
 		return synPrimeFDs;
 	}
 
-	/*set<Relation> deletionNormalization(AttributeSet attributes, set<FunctionalDependency> FDs) {
-		//Construct preparatory schema from above
-		set<Relation> preparatoryRelationsSet = constructPreparatorySchema(attributes, FDs);
-		vector<Relation> preparatoryRelations;
-		for (auto relItr = preparatoryRelations.begin(); relItr != preparatoryRelations.end(); ++relItr) {
-			Relation relation = *relItr;
-			preparatoryRelations.push_back(relation);
-		}
-		
-		set<Relation> finalRelation;
-		//Create synthesized FDs
-		globalSynthesizedFDs = createSynthesizedFDs(preparatoryRelationsSet);
-		//For each relation, for each attribute, 
-		for (unsigned int i = 0; i < preparatoryRelations.size(); i++) {
-			AttributeSet finalAttributes;
-			Relation relation = preparatoryRelations[i];
-			AttributeSet attributes = relation.getAttributes();
-			set<int> attributeSet = attributes.getAttributes();
-			for (auto attributesItr = attributeSet.begin(); attributesItr != attributeSet.end(); ++attributesItr) {
-				int singleAttributeValue = *attributesItr;
-				set<int> singleSet;
-				singleSet.insert(singleAttributeValue);
-				AttributeSet singleAttribute(singleSet);
-				set<AttributeSet> returnedKeys = superfluousAttributeDetection(relation, singleAttribute);
-				if (returnedKeys.size() != 0) {
-					finalAttributes = attributes - singleAttribute;
-				}
-				Relation newRelation(finalAttributes, returnedKeys);
-				swap(newRelation, preparatoryRelations[i]);
-				i--;  //Re-run the algorithm on the new relation again
-			}
-		}
-		//if superfluous attribute detection returns a nonempty set, construct a new relation and replace in preparatory schema
-		//Final output is in LTK normal form
-		set<Relation> finalRelations;
-		for (unsigned int i = 0; i < preparatoryRelations.size(); i++) {
-			finalRelations.insert(preparatoryRelations[i]);
-		}
-		return finalRelations;
-	}*/
-
 	AttributeSet fullAttributeSet(int numAttributes) {
 		set<int> fullAttr;
 		for (int i = 0; i < numAttributes; i++) {
@@ -232,7 +186,6 @@ namespace ltk {
 		unordered_map<AttributeSet, set<FunctionalDependency> > partitions = bernstein::partitionFd(minimalCover);  //Step 3
 		partitions = bernstein::mergeEquivalentKeys(partitions, minimalCover);  // step 4
 
-		//set<int> emptySet;
 		set<FunctionalDependency> allFdAfterPartitioning = bernstein::createSetOfFDFromPartitions(partitions);  // step 5
 		partitions = bernstein::eliminateTransitiveDependenciesForPartition(partitions, allFdAfterPartitioning);  // step 5
 		partitions = bernstein::addFdInJBackToCorrespondingGroup(partitions);
@@ -240,8 +193,7 @@ namespace ltk {
 
 		set<AttributeSet> keysForRelation;  // set of attributes that form key for at least one relation
 
-		// step 8 : find all keys for every relation
-		//int relNum = 0;
+		// step 7 : find all keys for every relation
 		for (auto iter = finalAnswer.begin(); iter != finalAnswer.end(); ++iter) {
 			// extension: find all keys of the relation
 			AttributeSet attrSet = iter->first;
@@ -253,7 +205,7 @@ namespace ltk {
 			finalRelations.insert(relation);
 		}
 
-		// step 7
+		// step 8
 		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(fullAttributeSet(numAttributes), allFdAfterPartitioning);
 
 		AttributeSet smallestKey = getSmallestKey(candidateKeys);
