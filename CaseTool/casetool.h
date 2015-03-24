@@ -17,7 +17,7 @@ public:
 
 public slots:
 	void addFD();
-	void showFD(FunctionalDependency fd);
+	QListWidgetItem* showFD(FunctionalDependency fd);
 	void addLhsToFd(bool);
 	void addRhsToFd(bool);
 	void numOfAttributes();

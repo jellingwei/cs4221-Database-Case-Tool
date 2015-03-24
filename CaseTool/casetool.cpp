@@ -1,5 +1,6 @@
 #include <set>
 #include <unordered_map>
+#include <map>
 #include <sstream>
 
 #include <QVBoxLayout>
@@ -19,6 +20,7 @@ using std::vector;
 using std::set;
 using std::string;
 using std::unordered_map;
+using std::map;
 
 CaseTool::CaseTool(QWidget *parent)
 	: QMainWindow(parent)
@@ -44,15 +46,21 @@ vector<QLineEdit*> attrLineEdit;
 
 set<FunctionalDependency> functionalDependecies;
 unordered_map<string, FunctionalDependency> fdStrToFd;
+map<FunctionalDependency, QListWidgetItem*> fdToDisplayedItem;
 vector<string> attrNames;
 
 string getTextOfCheckbox(int i) {
-	char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
-	std::stringstream ss;
-	ss << i_char;
-	string stringToDisplay;
-	ss >> stringToDisplay;
-	return stringToDisplay;
+
+	if (attrNames.size() > i && attrNames[i] != "") {
+		return attrNames[i];
+	} else {
+		char i_char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+		std::stringstream ss;
+		ss << i_char;
+		string stringToDisplay;
+		ss >> stringToDisplay;
+		return stringToDisplay;
+	}
 }
 
 
@@ -61,6 +69,9 @@ string CaseTool::displayFD(FunctionalDependency fd) {
 	string lhsStr ="";
 	set<int> lhs = fd.getLhs();
 	for (auto iter = lhs.begin(); iter != lhs.end(); ++iter) {
+		if (lhsStr != "") {
+			lhsStr += ",";
+		}
 		string str = getTextOfCheckbox(static_cast<long long>(*iter));
 		lhsStr += str;
 	}
@@ -68,6 +79,9 @@ string CaseTool::displayFD(FunctionalDependency fd) {
 	string rhsStr ="";
 	set<int> rhs = fd.getRhs();
 	for (auto iter = rhs.begin(); iter != rhs.end(); ++iter) {
+		if (rhsStr != "") {
+			rhsStr += ",";
+		}
 		string str = getTextOfCheckbox(static_cast<long long>(*iter));
 		rhsStr += str;
 	}
@@ -79,8 +93,11 @@ string CaseTool::displayFD(FunctionalDependency fd) {
 
 string displayAttributeSet(AttributeSet attrSet) {
 	set<int> attr = attrSet.getAttributes();
-	string finalStr;
+	string finalStr = "";
 	for (auto iter = attr.begin(); iter != attr.end(); ++iter) {
+		if (finalStr != "") {
+			finalStr += ",";
+		}
 		string str = getTextOfCheckbox(static_cast<long long>(*iter));
 		finalStr += str;
 	}
@@ -88,21 +105,23 @@ string displayAttributeSet(AttributeSet attrSet) {
 	return finalStr;
 }
 
-void CaseTool::showFD(FunctionalDependency fd) {
+QListWidgetItem* CaseTool::showFD(FunctionalDependency fd) {
 	string ans = displayFD(fd);
 	QListWidgetItem *item = new QListWidgetItem(QString(ans.c_str()), ui.FDList);
 	
 	fdStrToFd[ans] = fd;
 
 	ui.FDList->setCurrentItem(item);
+	return item;
 }
 
 void CaseTool::addFD() {
 	FunctionalDependency fd(lhs, rhs);
 	functionalDependecies.insert(fd);
 
+	
 	if(!lhs.empty() && !rhs.empty()) {
-		showFD(fd);
+		fdToDisplayedItem[fd] = showFD(fd);
 	} else {
 		qDebug() << "lhs or rhs is empty";
 	}
@@ -196,8 +215,7 @@ void CaseTool::renameAttr(const QString & text) {
 	QObject* obj = sender();
 	QLineEdit* emittingLineEdit = dynamic_cast<QLineEdit*>(obj);
 
-	QString name = emittingLineEdit->objectName();
-	QString newText = emittingLineEdit->text();
+	QString name = emittingLineEdit->objectName();	
 
 	for (int i = 0; i < numAttributes; i++) {
 		string attrName = "attrName";
@@ -207,8 +225,28 @@ void CaseTool::renameAttr(const QString & text) {
 		QCheckBox* rightCheckBox = rhsCheckBox[i];
 
 		if (name == QString::fromStdString(attrName)) {
-			leftCheckBox->setText(newText);
-			rightCheckBox->setText(newText);
+			leftCheckBox->setText(text);
+			rightCheckBox->setText(text);
+
+			string oldAttrName = attrNames[i];
+			attrNames[i] = text.toStdString();
+
+			for (auto iter = functionalDependecies.begin(); iter != functionalDependecies.end(); ++iter) {
+				FunctionalDependency fd = *iter;
+				
+				set<int> setWithUpdatedName;  setWithUpdatedName.insert(i);
+				if (fd.getLhsAttrSet().containsAttributes(setWithUpdatedName) || 
+					fd.getRhsAttrSet().containsAttributes(setWithUpdatedName)) {
+					
+						// change display of FD
+						QListWidgetItem* item = fdToDisplayedItem[fd];
+
+						item->setText( QString::fromStdString(displayFD(fd) ) );
+						fdStrToFd.erase(oldAttrName);
+						fdStrToFd[text.toStdString()] = fd;
+				}
+				
+			}
 		}
 	}
 
@@ -217,10 +255,10 @@ void CaseTool::renameAttr(const QString & text) {
 void CaseTool::numOfAttributes() {
 	numAttributes = ui.numOfAttributes->value();
 
+
 	if (ui.attrNameScrollArea->layout() != NULL) {
 		clearLayout(ui.attrNameScrollArea->layout());
 		attrLineEdit.clear();
-		attrNames.clear();
 
 		delete ui.attrNameScrollArea->layout();
 	}
@@ -244,6 +282,7 @@ void CaseTool::numOfAttributes() {
 	
 	QVBoxLayout *attrNamelay = new QVBoxLayout(this);
 	attrNamelay->setDirection(QBoxLayout::LeftToRight);
+	vector<string> tempAttrNames;
 	for(int i=0; i < numAttributes; i++)
 	{
 		QLineEdit* dynamic = new QLineEdit("");
@@ -259,7 +298,15 @@ void CaseTool::numOfAttributes() {
 		QObject::connect(dynamic, SIGNAL(textChanged(const QString &)), SLOT(renameAttr(const QString &)));
 
 		attrLineEdit.push_back(dynamic);
+		if (attrNames.size() > i && attrNames[i] != "") {
+			tempAttrNames.push_back(attrNames[i]);
+		} else {
+			tempAttrNames.push_back("");
+		}
 	}
+
+	attrNames = tempAttrNames;
+
 	ui.attrNameScrollArea->setLayout(attrNamelay);
 
 	QVBoxLayout *lay = new QVBoxLayout(this);
@@ -337,7 +384,7 @@ void CaseTool::runLTK() {
 
 	for (auto relItr = preparatoryRelations.begin(); relItr != preparatoryRelations.end(); ++relItr) {
 		Relation rel = *relItr;
-		string attrStr = rel.getAttributes().toString();
+		string attrStr = displayAttributeSet(rel.getAttributes());
 		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
 		item->setData(Qt::UserRole, QString(attrStr.c_str()));
 		ui.outputLTK->setCurrentItem(item);
@@ -374,7 +421,7 @@ void CaseTool::runLTK() {
 			string step3;
 			step3 += "Check if ";
 			step3 += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[attrVec[j]];
-			step3 += " is superfluous in " + attributes.toString();
+			step3 += " is superfluous in " + displayAttributeSet(attributes);
 			item = new QListWidgetItem(QString(step3.c_str()), ui.outputLTK);
 			item->setData(Qt::UserRole, QString(step3.c_str()));
 
@@ -414,7 +461,7 @@ void CaseTool::runLTK() {
 		Relation rel = prepRelations[i];
 		AttributeSet attributes = rel.getAttributes();
 		set<AttributeSet> keys = rel.getKeys();
-		string attrStr = "R" + std::to_string(static_cast<long long>(i+1)) + ": " + attributes.toString();
+		string attrStr = "R" + std::to_string(static_cast<long long>(i+1)) + ": " + displayAttributeSet(attributes);
 		string keyStr;
 
 		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
@@ -423,7 +470,7 @@ void CaseTool::runLTK() {
 
 		for (auto keyItr = keys.begin(); keyItr != keys.end(); ++keyItr) {
 			AttributeSet key = *keyItr;
-			keyStr += key.toString() + ", ";
+			keyStr += displayAttributeSet(key) + ", ";
 		}
 		keyStr.resize(keyStr.size() - 2);
 		item = new QListWidgetItem(QString(keyStr.c_str()), ui.outputLTK);
@@ -711,7 +758,7 @@ void CaseTool::runBernstein() {
 		debugCandidateKeys(candidateKeys);
 
 	
-		string attrStr = "R" + std::to_string(static_cast<long long>(++relNum)) + ": " + attrSet.toString();
+		string attrStr = "R" + std::to_string(static_cast<long long>(++relNum)) + ": " + displayAttributeSet(attrSet);
 		string keyStr;
 
 		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputList);
@@ -720,7 +767,7 @@ void CaseTool::runBernstein() {
 
 		for (auto keyItr = candidateKeys.begin(); keyItr != candidateKeys.end(); ++keyItr) {
 			AttributeSet key = *keyItr;
-			keyStr += key.toString() + ", ";
+			keyStr += displayAttributeSet(key) + ", ";
 		}
 		keyStr.resize(keyStr.size() - 2);
 		item = new QListWidgetItem(QString(keyStr.c_str()), ui.outputList);

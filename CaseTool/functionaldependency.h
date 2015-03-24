@@ -45,7 +45,6 @@ public:
 		return (lhs == fd2.lhs) && (rhs == fd2.rhs);
 	}
 
-	string display();
 
 private:
 	set<int> lhs;

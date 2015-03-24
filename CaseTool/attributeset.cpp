@@ -105,10 +105,4 @@ int AttributeSet::size() {
 	return attributes.size();
 }
 
-string AttributeSet::toString() {
-	string returnString;
-	for (auto itr = attributes.begin(); itr != attributes.end(); ++itr) {
-		returnString += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[*itr];
-	}
-	return returnString;
-}
+
