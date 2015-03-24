@@ -27,6 +27,7 @@ CaseTool::CaseTool(QWidget *parent)
 {
 	ui.setupUi(this);
 
+	ui.numOfAttributes->setValue(5);
 
 }
 
@@ -102,7 +103,7 @@ string displayAttributeSet(AttributeSet attrSet) {
 		finalStr += str;
 	}
 
-	return finalStr;
+	return "(" + finalStr + ")";
 }
 
 QListWidgetItem* CaseTool::showFD(FunctionalDependency fd) {
