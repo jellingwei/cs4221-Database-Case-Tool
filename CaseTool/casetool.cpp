@@ -50,6 +50,8 @@ unordered_map<string, FunctionalDependency> fdStrToFd;
 map<FunctionalDependency, QListWidgetItem*> fdToDisplayedItem;
 vector<string> attrNames;
 
+string attrLineEditObjectName = "attrName";
+
 string getTextOfCheckbox(int i) {
 
 	if (attrNames.size() > i && attrNames[i] != "") {
@@ -219,7 +221,7 @@ void CaseTool::renameAttr(const QString & text) {
 	QString name = emittingLineEdit->objectName();	
 
 	for (int i = 0; i < numAttributes; i++) {
-		string attrName = "attrName";
+		string attrName = attrLineEditObjectName;
 		attrName += std::to_string(static_cast<long long>(i + 1));
 
 		QCheckBox* leftCheckBox = lhsCheckBox[i];
@@ -248,7 +250,38 @@ void CaseTool::renameAttr(const QString & text) {
 				}
 
 			}
+			break;
 		}
+	}
+
+}
+
+void CaseTool::doneEditingName() {
+	QObject* obj = sender();
+	QLineEdit* emittingLineEdit = dynamic_cast<QLineEdit*>(obj);
+
+	QString name = emittingLineEdit->objectName();	
+	QString attributeName = emittingLineEdit->text();
+
+	bool isRepeated= false;
+	int editedIndex;
+
+	for (int i = 0; i < numAttributes; i++) {
+		// if the name is repeated from the current names
+		QString attributeObjectName = QString::fromStdString(attrLineEditObjectName + std::to_string(static_cast<long long>(i + 1)));
+		if (getTextOfCheckbox(i) == attributeName.toStdString() && name != attributeObjectName) {
+			isRepeated = true;
+		}
+
+		if (name == attributeObjectName) {
+			editedIndex = i;
+		}
+
+	}
+
+	if (isRepeated) {
+		attrNames[editedIndex] = ""; // reset
+		emittingLineEdit->setText(QString::fromStdString(getTextOfCheckbox(editedIndex) ));
 	}
 
 }
@@ -287,7 +320,7 @@ void CaseTool::numOfAttributes() {
 	for(int i=0; i < numAttributes; i++)
 	{
 		QLineEdit* dynamic = new QLineEdit("");
-		string name = "attrName";
+		string name = attrLineEditObjectName;
 		name += std::to_string(static_cast<long long>(i + 1));
 
 		dynamic->setObjectName(QString(name.c_str()));
@@ -297,6 +330,9 @@ void CaseTool::numOfAttributes() {
 		attrNamelay->addWidget(dynamic);
 
 		QObject::connect(dynamic, SIGNAL(textChanged(const QString &)), SLOT(renameAttr(const QString &)));
+
+		QObject::connect(dynamic, SIGNAL(editingFinished()), SLOT(doneEditingName()));
+		
 
 		attrLineEdit.push_back(dynamic);
 		if (attrNames.size() > i && attrNames[i] != "") {

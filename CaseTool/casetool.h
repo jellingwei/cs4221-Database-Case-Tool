@@ -29,6 +29,7 @@ public slots:
 	void runBernstein();
 	void renameAttr(const QString & text);
 	string displayFD(FunctionalDependency fd);
+	void doneEditingName();
 	
 private:
 	Ui::CaseToolClass ui;
