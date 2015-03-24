@@ -19,7 +19,20 @@ public:
 
 	bool operator<( const Relation& relation2 ) const 
 	{
-		return (_attributes < relation2._attributes && _keys < relation2._keys);
+		if (_attributes == relation2._attributes) {
+			return _keys < relation2._keys;
+			/*if (_keys.size() == relation2._keys.size()) {
+				if (_keys.size() == 0) {
+					return false;
+				} else {
+					return *(_keys.begin()) < *(relation2._keys.begin());
+				}
+			} else {
+				return _keys.size() == relation2._keys.size();
+			}*/
+		} else {
+			return (_attributes < relation2._attributes);
+		}
 	}
 
 	bool operator==( const Relation& relation2 ) const 
