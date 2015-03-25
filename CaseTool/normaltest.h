@@ -22,7 +22,7 @@ namespace normalTest {
 	char secondNormalForm(set<FunctionalDependency>, AttributeSet attr);
 	char thirdNormalForm(set<FunctionalDependency>, AttributeSet attr);
 	char boyceCoddNormalForm(set<FunctionalDependency>, AttributeSet attr);
-	char elementaryKeyNormalForm(set<FunctionalDependency>, AttributeSet attr);
+	//char elementaryKeyNormalForm(set<FunctionalDependency>, AttributeSet attr);
 	int findFactorial(int num);
 	set<int> findNonPrime(set<int> attributes);
 	set<int> findPrime();

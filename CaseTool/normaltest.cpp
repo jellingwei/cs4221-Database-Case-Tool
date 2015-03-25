@@ -54,11 +54,11 @@ namespace normalTest {
 		int numberOfCandidateKeys = findCandidateKeys(relation, attr);
 		nonPrime = findNonPrime(attributes);
 		prime = findPrime();
-		if(nonPrime.empty()){
-			qDebug()<<("no non primes");
-		}
+		/*if(nonPrime.empty()){
+			//qDebug()<<("no non primes");
+		}*/
 		char normalForm = runNormalTests(relation, attr);
-		qDebug() << QString("char is ") << normalForm;
+		////qDebug() << QString("char is ") << normalForm;
 		return normalForm;
 	}
 	
@@ -67,7 +67,7 @@ namespace normalTest {
 
 		int attrSize = attr.size();
 		int theEnd = 0; // the expected number of sets in powerSet per iteration
-		//qDebug() << QString("Okay entering loop");
+		////qDebug() << QString("Okay entering loop");
 
 		//--------- start of finding power set----------------------------------
 		powerSet.insert(attr); theEnd++;
@@ -94,7 +94,7 @@ namespace normalTest {
 			//============================================================
 		}
 		
-		//qDebug() << QString("first loop results");
+		////qDebug() << QString("first loop results");
 		//test function ----------------------------------------------------------------------
 		//int mySize;
 		//for(auto it = powerSet.begin(); it != powerSet.end(); ++it){
@@ -107,12 +107,12 @@ namespace normalTest {
 		//	set<int> testSet = tempAttributeSet.getAttributes(); //get individual set
 
 		//	for(auto it = testSet.begin(); it != testSet.end(); it++){
-		//		qDebug()<< *it;
+		//		//qDebug()<< *it;
 		//	}
 		//	mySize = powerSet.size();
-		//	qDebug()<< endl;
+		//	//qDebug()<< endl;
 		//}
-		//qDebug() << QString("my size is ") << mySize;
+		////qDebug() << QString("my size is ") << mySize;
 		///test function ----------------------------------------------------------------
 		int performFactorialCheck = 1;
 		int conAttrSize = attrSize;
@@ -121,7 +121,7 @@ namespace normalTest {
 			
 			if(performFactorialCheck){
 				int numerator = findFactorial(conAttrSize);
-				//qDebug() << numerator;
+				////qDebug() << numerator;
 				int cNumber;
 				if(attrSize-2>0){
 					cNumber = attrSize-2;
@@ -129,7 +129,7 @@ namespace normalTest {
 					intermediate = findFactorial(intermediate);
 					cNumber = findFactorial(cNumber);
 					cNumber *= intermediate;
-					//qDebug() << cNumber;
+					////qDebug() << cNumber;
 					theEnd += (numerator/cNumber);
 					//find 4cX here
 
@@ -139,17 +139,17 @@ namespace normalTest {
 			}
 			//start from 2nd iteration
 			//first to get one individual attribute set
-			//qDebug()<< QString("start of iteration!");
+			////qDebug()<< QString("start of iteration!");
 			set<int> dummy;
 			dummy.insert(99);
 			AttributeSet tempAttributeSet(dummy);
 			
 			tempAttributeSet = *it;
-			//qDebug()<< QString("before assigning tempset to it");
+			////qDebug()<< QString("before assigning tempset to it");
 			set<int> testSet = tempAttributeSet.getAttributes(); //get individual set
-			//qDebug()<< QString("working on this testset: ");
+			////qDebug()<< QString("working on this testset: ");
 			for(auto it2 = testSet.begin(); it2 != testSet.end(); ++it2){
-				qDebug() << *it2;
+				//qDebug() << *it2;
 			}
 								
 			//split into smaller subsets
@@ -160,7 +160,7 @@ namespace normalTest {
 					set<int> temp = testSet;
 					auto iter = temp.begin();
 
-					//qDebug() << QString("temp size is:")<<temp.size();
+					////qDebug() << QString("temp size is:")<<temp.size();
 
 					int k = loopIterator;
 					//iterate to the correct element
@@ -172,9 +172,9 @@ namespace normalTest {
 					}
 
 					temp.erase(iter);
-					//qDebug()<< QString("temp's elements are: ");
+					////qDebug()<< QString("temp's elements are: ");
 					for(auto it3 = temp.begin(); it3 != temp.end(); ++it3){
-						qDebug()<< *it3;
+						//qDebug()<< *it3;
 					}
 					powerSet.insert(temp);
 					loopIterator++;
@@ -183,7 +183,7 @@ namespace normalTest {
 				
 			}
 			else
-				qDebug() << QString("This set did not enter iterative part");
+				//qDebug() << QString("This set did not enter iterative part");
 			auto lastSet = powerSet.end();
 
 			// if it equals to lastSet does not work
@@ -191,25 +191,25 @@ namespace normalTest {
 				attrSize--; // can only decrease after all is done
 				it = powerSet.begin();
 				performFactorialCheck =1;
-				//qDebug() << QString("reset");
+				////qDebug() << QString("reset");
 			}
 			
-			//qDebug() << QString("attr size is:")<<attrSize;
-			//qDebug() << QString("the end is ") << theEnd;
+			////qDebug() << QString("attr size is:")<<attrSize;
+			////qDebug() << QString("the end is ") << theEnd;
 		}
-		//qDebug() << QString("reached end of powerset part");
-		qDebug() << QString("These are what is in the powerset in order");
+		////qDebug() << QString("reached end of powerset part");
+		//qDebug() << QString("These are what is in the powerset in order");
 		for(auto itera=powerSet.begin(); itera!= powerSet.end(); ++itera){
 			set<int> testSett;
 			testSett.insert(99);
 			AttributeSet testAS(testSett);
 			testAS = *itera;
 			set<int> testSett2 = testAS.getAttributes();
-			qDebug() << QString("{");
+			//qDebug() << QString("{");
 			for(auto itera2=testSett2.begin(); itera2 != testSett2.end(); ++itera2){
-				qDebug() << *itera2;
+				//qDebug() << *itera2;
 			}
-			qDebug() << QString("}");
+			//qDebug() << QString("}");
 		}
 	// ---------------end of finding powerset----------------
 
@@ -235,7 +235,7 @@ namespace normalTest {
 		//find minimal size
 		// print candidate
 		int minimumSize = 99;
-		qDebug() << QString("Printing superkeys:");
+		//qDebug() << QString("Printing superkeys:");
 		for(auto it=superKeys.begin(); it!=superKeys.end(); ++it){
 			set<int> dumbo;
 			dumbo.insert(99);
@@ -247,11 +247,11 @@ namespace normalTest {
 			if(candySet_set.size() < minimumSize){
 				minimumSize = candySet_set.size();
 			}
-			qDebug() << QString("{");
+			//qDebug() << QString("{");
 			for(auto iter=candySet_set.begin(); iter!=candySet_set.end(); ++iter){
-				qDebug() << *iter;
+				//qDebug() << *iter;
 			}
-			qDebug() << QString("}");
+			//qDebug() << QString("}");
 		}
 		for(auto it=superKeys.begin(); it!=superKeys.end(); ++it){
 			set<int> dumbo;
@@ -263,7 +263,7 @@ namespace normalTest {
 			candySet_set = candySet.getAttributes();
 			if(candySet_set.size() == minimumSize){
 				candidateKeys.insert(candySet);
-				qDebug()<< QString("candidate key inserted!");
+				//qDebug()<< QString("candidate key inserted!");
 			}
 		}
 		sizeOfCandi = minimumSize;
@@ -273,13 +273,9 @@ namespace normalTest {
 	char runNormalTests(set<FunctionalDependency> relation, AttributeSet attr){
 
 		if(secondNormalForm(relation, attr) == '2'){
-			if(thirdNormalForm(relation, attr) == '3'){
-				if(elementaryKeyNormalForm(relation, attr) == 'e'){
-					if(boyceCoddNormalForm(relation, attr) == 'b'){
-						return 'b';
-					}
-					else
-						return 'e';
+			if(thirdNormalForm(relation, attr) == '3'){			
+				if(boyceCoddNormalForm(relation, attr) == 'b'){
+					return 'b';
 				}
 				else
 					return '3';
@@ -287,7 +283,8 @@ namespace normalTest {
 			else
 				return '2';
 		}
-		return '1';
+		else
+			return '1';
 	}
 
 	char secondNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
@@ -314,10 +311,10 @@ namespace normalTest {
 					//find if nonprime is fully dependent on candidatek eys
 					else if(nonPrimeCheck != nonPrime.end()){
 						auto candiCheck = candidateKeys.find(lhsAS);
-						//qDebug() << QString("non prime found");
+						////qDebug() << QString("non prime found");
 						//check if LHS is the whole key
 						if(candiCheck != candidateKeys.end()){
-							qDebug() << QString("non prime dependent on whole key");
+							//qDebug() << QString("non prime dependent on whole key");
 							snfCondition = 1;		
 						}
 						else{
@@ -326,7 +323,7 @@ namespace normalTest {
 							//check if lhs is part of key
 							if(lhs.size() >= sizeOfCandi){
 								snfCondition = 1;
-								qDebug() << QString("lhs is bigger than key");
+								//qDebug() << QString("lhs is bigger than key");
 							}
 							else{
 								for(auto itera=candidateKeys.begin(); itera!=candidateKeys.end(); ++itera){
@@ -381,7 +378,7 @@ namespace normalTest {
 				}
 				//find if rhs is prime attribute
 				else if(isSubsetOf(prime, rhs)){
-					qDebug() << QString("rhs is prime");
+					//qDebug() << QString("rhs is prime");
 					tnfCondition=1;
 				}
 				else{
@@ -417,77 +414,77 @@ namespace normalTest {
 			return '2';
 	}
 
-	char elementaryKeyNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
-		int eknfCondition = 1;
-		int eknfLoopCounter = 0;
-		for(auto it=relation.begin(); it != relation.end(); ++it){
-			FunctionalDependency fd = *it;
-			set<int> lhs = fd.getLhs();
-			set<int> rhs = fd.getRhs();
-			int it2LoopChecker = 1;
-			eknfLoopCounter++;
-			if(eknfLoopCounter == relation.size()){
-				break;
-			}
-			//---------------------check if trivial
-			if(isSubsetOf(lhs, rhs)){
-				eknfCondition = 1;
-			}
-			else{
-				for(auto it2 = relation.begin(); it2 !=relation.end(); ++it2){
-					//--------------------------start comparison from next fd
-					//--------------------------compare fds to check for full dependency
-					if(it2LoopChecker == 1){
-						it2 = it;
-						++it2;
-						it2LoopChecker = 0;
-						////test
-						//FunctionalDependency fdTest = *it2;
-						//set<int>lhsTest = fdTest.getLhs();
-						//FunctionalDependency fdTest2 = *it;
-						//set<int>lhsTest2 = fdTest2.getLhs();
-						////qDebug() << QString("THIS IS THE FD YOU WANT TO SEE");
-						//for(auto testIT = lhsTest.begin(); testIT != lhsTest.end(); ++testIT){
-						//	qDebug() << *testIT;
-						//}
-						//qDebug() << QString("THIS IS THE FD YOU comparing with");
-						//for(auto testIT2 = lhsTest2.begin(); testIT2 != lhsTest2.end(); ++testIT2){
-						//	qDebug() << *testIT2;
-						//}
-					}
-					FunctionalDependency fd2 = *it2;
-					set<int>rhs2 = fd2.getRhs();
-					set<int>lhs2 = fd2.getLhs();
-					////test
-					//qDebug() << QString("1st rhs");
-					//for(auto iter1 = rhs.begin(); iter1!=rhs.end(); ++iter1){
-					//	qDebug() << *iter1;
-					//}
-					//qDebug() << QString("2nd rhs");
-					//for(auto iter2 = rhs2.begin(); iter2!=rhs2.end(); ++iter2){
-					//	qDebug() << *iter2;
-					//}
-					if(rhs2 == rhs){
-						if(isSubsetOf(lhs, lhs2) || isSubsetOf(lhs2, lhs)){
-							//problem may arise if im comparing the same fds
-							//qDebug() << QString("not eknf you gg");
-							eknfCondition = 0;
-							break;
-						}
-					}
-				}	
-			}
-			if(eknfCondition == 0){
-				break;
-			}
+	//char elementaryKeyNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
+	//	int eknfCondition = 1;
+	//	int eknfLoopCounter = 0;
+	//	for(auto it=relation.begin(); it != relation.end(); ++it){
+	//		FunctionalDependency fd = *it;
+	//		set<int> lhs = fd.getLhs();
+	//		set<int> rhs = fd.getRhs();
+	//		int it2LoopChecker = 1;
+	//		eknfLoopCounter++;
+	//		if(eknfLoopCounter == relation.size()){
+	//			break;
+	//		}
+	//		//---------------------check if trivial
+	//		if(isSubsetOf(lhs, rhs)){
+	//			eknfCondition = 1;
+	//		}
+	//		else{
+	//			for(auto it2 = relation.begin(); it2 !=relation.end(); ++it2){
+	//				//--------------------------start comparison from next fd
+	//				//--------------------------compare fds to check for full dependency
+	//				if(it2LoopChecker == 1){
+	//					it2 = it;
+	//					++it2;
+	//					it2LoopChecker = 0;
+	//					////test
+	//					//FunctionalDependency fdTest = *it2;
+	//					//set<int>lhsTest = fdTest.getLhs();
+	//					//FunctionalDependency fdTest2 = *it;
+	//					//set<int>lhsTest2 = fdTest2.getLhs();
+	//					//////qDebug() << QString("THIS IS THE FD YOU WANT TO SEE");
+	//					//for(auto testIT = lhsTest.begin(); testIT != lhsTest.end(); ++testIT){
+	//					//	//qDebug() << *testIT;
+	//					//}
+	//					////qDebug() << QString("THIS IS THE FD YOU comparing with");
+	//					//for(auto testIT2 = lhsTest2.begin(); testIT2 != lhsTest2.end(); ++testIT2){
+	//					//	//qDebug() << *testIT2;
+	//					//}
+	//				}
+	//				FunctionalDependency fd2 = *it2;
+	//				set<int>rhs2 = fd2.getRhs();
+	//				set<int>lhs2 = fd2.getLhs();
+	//				////test
+	//				////qDebug() << QString("1st rhs");
+	//				//for(auto iter1 = rhs.begin(); iter1!=rhs.end(); ++iter1){
+	//				//	//qDebug() << *iter1;
+	//				//}
+	//				////qDebug() << QString("2nd rhs");
+	//				//for(auto iter2 = rhs2.begin(); iter2!=rhs2.end(); ++iter2){
+	//				//	//qDebug() << *iter2;
+	//				//}
+	//				if(rhs2 == rhs){
+	//					if(isSubsetOf(lhs, lhs2) || isSubsetOf(lhs2, lhs)){
+	//						//problem may arise if im comparing the same fds
+	//						////qDebug() << QString("not eknf you gg");
+	//						eknfCondition = 0;
+	//						break;
+	//					}
+	//				}
+	//			}	
+	//		}
+	//		if(eknfCondition == 0){
+	//			break;
+	//		}
 
-		}
-		if(eknfCondition){
-			return 'e';
-		}
-		else
-			return '3';
-	}
+	//	}
+	//	if(eknfCondition){
+	//		return 'e';
+	//	}
+	//	else
+	//		return '3';
+	//}
 
 	char boyceCoddNormalForm(set<FunctionalDependency> relation, AttributeSet attr){
 		int bcnfCondition = 1;
@@ -573,7 +570,7 @@ namespace normalTest {
 		int sizeOfRemains = holdAll.size();
 		for(int i=0; i<sizeOfRemains; i++){
 			int nonPrimeA = holdAll.top();
-			qDebug() << QString("Non prime here:") << nonPrimeA;
+			//qDebug() << QString("Non prime here:") << nonPrimeA;
 			nonPrime.insert(nonPrimeA);
 			holdAll.pop();
 		}
@@ -593,11 +590,11 @@ namespace normalTest {
 		}
 
 		if(size == count){
-			//qDebug() << QString("yes subset");
+			////qDebug() << QString("yes subset");
 			return 1; 
 		}
 		else{
-			//qDebug() << QString("not subset");
+			////qDebug() << QString("not subset");
 			return 0;
 		}
 	}
