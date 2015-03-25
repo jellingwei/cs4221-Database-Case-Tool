@@ -332,7 +332,7 @@ void CaseTool::numOfAttributes() {
 		QObject::connect(dynamic, SIGNAL(textChanged(const QString &)), SLOT(renameAttr(const QString &)));
 
 		QObject::connect(dynamic, SIGNAL(editingFinished()), SLOT(doneEditingName()));
-		
+
 
 		attrLineEdit.push_back(dynamic);
 		if (attrNames.size() > i && attrNames[i] != "") {
@@ -419,12 +419,24 @@ void CaseTool::runLTK() {
 	item->setData(Qt::UserRole, QString(step1Separator.c_str()));
 	set<Relation> preparatoryRelations = ltk::constructPreparatorySchema(fdSet, numAttributes);
 
+	int counter = 1;
 	for (auto relItr = preparatoryRelations.begin(); relItr != preparatoryRelations.end(); ++relItr) {
 		Relation rel = *relItr;
-		string attrStr = displayAttributeSet(rel.getAttributes());
+		AttributeSet attributes = rel.getAttributes();
+		set<AttributeSet> keys = rel.getKeys();
+		string attrStr = "R" + std::to_string(static_cast<long long>(counter++)) + ": " + displayAttributeSet(attributes);
 		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
 		item->setData(Qt::UserRole, QString(attrStr.c_str()));
 		ui.outputLTK->setCurrentItem(item);
+		
+		string keyStr = "Key(s): ";
+		for (auto keyItr = keys.begin(); keyItr != keys.end(); ++keyItr) {
+			AttributeSet key = *keyItr;
+			keyStr += displayAttributeSet(key) + ", ";
+		}
+		keyStr.resize(keyStr.size() - 2);
+		item = new QListWidgetItem(QString(keyStr.c_str()), ui.outputLTK);
+		item->setData(Qt::UserRole, QString(keyStr.c_str()));
 	}
 
 	string step2Separator = "\nStep 2: Construct synthesized FDs";
@@ -480,6 +492,17 @@ void CaseTool::runLTK() {
 				item = new QListWidgetItem(QString(notSuperfluous.c_str()), ui.outputLTK);
 				item->setData(Qt::UserRole, QString(notSuperfluous.c_str()));
 			} else {
+				/*set<FunctionalDependency> synthesizedPrimeFDs = ltk::getSynthesizedPrimeFDs();
+				step3 = "Construct G'(" + displayAttributeSet(singleAttr) + ")";
+				item = new QListWidgetItem(QString(step3.c_str()), ui.outputLTK);
+				item->setData(Qt::UserRole, QString(step3.c_str()));
+
+				for (auto fdItr = synthesizedPrimeFDs.begin(); fdItr != synthesizedPrimeFDs.end(); ++fdItr) {
+					step3 = displayFD(*fdItr);
+					item = new QListWidgetItem(QString(step3.c_str()), ui.outputLTK);
+					item->setData(Qt::UserRole, QString(step3.c_str()));
+				}*/
+
 				string superfluous;
 				superfluous += displayAttributeSet(singleAttrSet) + " is superfluous";
 				item = new QListWidgetItem(QString(superfluous.c_str()), ui.outputLTK);
@@ -499,7 +522,7 @@ void CaseTool::runLTK() {
 
 				//Since the relation is reconstructed, construct another set of synthesized FDs
 				unordered_map<AttributeSet, set<FunctionalDependency> > synFD = ltk::createSynthesizedFDs(preparatoryRelations);
-				string message = "Create new global synthesized FDs";
+				string message = "Create new set of synthesized FDs";
 				item = new QListWidgetItem(QString(message.c_str()), ui.outputLTK);
 				item->setData(Qt::UserRole, QString(message.c_str()));
 				ui.outputLTK->setCurrentItem(item);
@@ -527,12 +550,31 @@ void CaseTool::runLTK() {
 		AttributeSet attributes = rel.getAttributes();
 		set<AttributeSet> keys = rel.getKeys();
 		string attrStr = "R" + std::to_string(static_cast<long long>(i+1)) + ": " + displayAttributeSet(attributes);
-		string keyStr;
+		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
+		item->setData(Qt::UserRole, QString(attrStr.c_str()));
+
+		string keyStr = "Key(s): ";
+
+		/*Extension: Find all keys of the relation
+		unordered_map<AttributeSet, set<FunctionalDependency> > synFD = ltk::createSynthesizedFDs(preparatoryRelations);
+		set<FunctionalDependency> allSynFD;
+		for (auto itr = synFD.begin(); itr != synFD.end(); ++itr) {
+			set<FunctionalDependency> fdSet = itr->second;
+			for (auto fdItr = fdSet.begin(); fdItr != fdSet.end(); ++fdItr) {
+				allSynFD.insert(*fdItr);
+			}
+		}
+		set<AttributeSet> candidateKeys = bernstein::findCandidateKeys(attributes, allSynFD);
 
 		item = new QListWidgetItem(QString(attrStr.c_str()), ui.outputLTK);
 		item->setData(Qt::UserRole, QString(attrStr.c_str()));
-		keyStr = "Key(s): ";
+		keyStr = "Key(s): ";*/
 
+		/*
+		for (auto keyItr = candidateKeys.begin(); keyItr != candidateKeys.end(); ++keyItr) {
+			AttributeSet key = *keyItr;
+			keyStr += displayAttributeSet(key) + ", ";
+		}*/
 		for (auto keyItr = keys.begin(); keyItr != keys.end(); ++keyItr) {
 			AttributeSet key = *keyItr;
 			keyStr += displayAttributeSet(key) + ", ";

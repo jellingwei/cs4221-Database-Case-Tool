@@ -17,6 +17,7 @@ namespace ltk {
 	//Private attributes
 	unordered_map<AttributeSet, set<FunctionalDependency> > globalSynthesizedFDs;
 	set<FunctionalDependency> globalFDs;
+	set<FunctionalDependency> localSynthesizedPrimeFDs;
 
 	//Private methods
 	set<Relation> runBernstein(set<FunctionalDependency> startFd, int numAttributes);
@@ -52,6 +53,7 @@ namespace ltk {
 			isSuperfluous = false;
 			//Construct a new set of synthesized FDs without the single attribute
 			reducedSynthesizedFDs = constructSynthesizedPrimeFDs(prepRelationAttributes, singleAttribute);
+			localSynthesizedPrimeFDs = reducedSynthesizedFDs;
 
 			for (auto keyItr = reducedSynthesizedKeys.begin(); keyItr != reducedSynthesizedKeys.end(); ++keyItr) {
 				AttributeSet key = *keyItr;
@@ -102,6 +104,10 @@ namespace ltk {
 			set<AttributeSet> empty;
 			return empty;
 		}
+	}
+
+	set<FunctionalDependency> getSynthesizedPrimeFDs() {
+		return localSynthesizedPrimeFDs;
 	}
 
 	set<FunctionalDependency> getGlobalFDs() {
@@ -155,6 +161,9 @@ namespace ltk {
 						AttributeSet rhs = fd.getRhsAttrSet();
 						rhs = rhs - excludeAttr;
 						rhs = rhs - key;
+						if (rhs.size() == 0) {
+							continue;
+						}
 						FunctionalDependency newFD(key, rhs);
 						synPrimeFDs.insert(newFD);
 					} else {
