@@ -1,5 +1,10 @@
 # README #
 
+### Description ###
+
+CS4221 Course Project
+
+Implement a Relational database schema design CASE tool (e.g. implement Bernstein's Algorithm with some enhancements, e.g. LTK Algorithm)
 
 ### Set up ###
 
